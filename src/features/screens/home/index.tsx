@@ -7,6 +7,7 @@ import Slide3 from "../../../assets/png/thirs.png";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../../navigation/types";
+import Privacy from "../../../components/privacy";
 
 const slides = [
   {
@@ -29,7 +30,7 @@ const slides = [
 type NavProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function Home() {
-const navigation = useNavigation<NavProp>();
+  const navigation = useNavigation<NavProp>();
   const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
@@ -107,39 +108,20 @@ const navigation = useNavigation<NavProp>();
         backgroundColor={"#540863"}
         textColor={"#fff"}
         title={"Sign up for free"}
-        onPress={() =>navigation.navigate("register")}
+        onPress={() => navigation.navigate("register")}
       />
 
       <Text style={{ textAlign: "center", marginTop: 17.5 }}>
-        Already have an account? <Text style={styles.loginText} 
-        onPress={() => navigation.navigate('login')}
-        
-        >Login</Text>
+        Already have an account?{" "}
+        <Text
+          style={styles.loginText}
+          onPress={() => navigation.navigate("login")}
+        >
+          Login
+        </Text>
       </Text>
 
-      <View
-        style={{
-          marginTop: 50,
-          alignItems: "center",
-          justifyContent: "center",
-          width: "75%",
-          alignSelf: "center",
-          marginBottom: 50,
-
-        }}
-      >
-        <Text style={{ textAlign: "center", marginTop: 17.5 }}>
-          By continuing, you agree to our{" "}
-          <Text style={{ color: "#540863", fontWeight: "bold" }}>
-             Privacy Policy 
-          </Text>{" "}
-          and{" "}
-          <Text style={{ color: "#540863", fontWeight: "bold" }}>
-            Terms of Service  
-          </Text>
-          .
-        </Text>
-      </View>
+      <Privacy />
     </ScrollView>
   );
 }
@@ -178,7 +160,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontFamily: "BricolageGrotesque",
     fontWeight: "bold",
-
   },
 
   desc: {
@@ -192,6 +173,5 @@ const styles = StyleSheet.create({
     color: "#540863",
     fontWeight: "bold",
     cursor: "pointer",
- 
   },
 });
