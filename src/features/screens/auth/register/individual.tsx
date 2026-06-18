@@ -52,7 +52,7 @@ export default function Individual() {
               backgroundColor="#909194"
               textColor="#fff"
               title="Sign up for free"
-              onPress={() => {}}
+              onPress={() => {navigation.navigate("verify")}}
             />
             <Text style={{ textAlign: "center", marginTop: 17.5 }}>
               Already have an account?

@@ -37,7 +37,14 @@ export default function Login() {
           <TextInputField label="Password" isPassword placeholder="Password" />
         </View>
 
-        <Text style={styles.forgetPwd}>Forgot password?</Text>
+        <Text
+          style={styles.forgetPwd}
+          onPress={() => {
+            navigation.navigate("forgot");
+          }}
+        >
+          Forgot password?
+        </Text>
       </ScrollView>
 
       <View style={styles.footer}>

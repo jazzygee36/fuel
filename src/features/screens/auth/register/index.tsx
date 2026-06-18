@@ -1,4 +1,11 @@
-import { ScrollView, Text, StyleSheet, View, Pressable } from "react-native";
+import {
+  ScrollView,
+  Text,
+  StyleSheet,
+  View,
+  Pressable,
+  Image,
+} from "react-native";
 import BackArrow from "../../../../components/back-arrow";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -11,17 +18,20 @@ const account = [
     desc: "For personal fueling and everyday driving",
     color: "#F7E8F0",
     path: "individual",
+    image: require("../../../../assets/png/signup-user.png"),
   },
   {
     title: "Corporate",
     desc: "For managing company vehicles and fuel expenses",
     color: "#FFE2B3",
     path: "corporate",
+    image: require("../../../../assets/png/signup-shop.png"),
   },
   {
     title: "Insurance",
     desc: "For managing company vehicles and fuel expenses",
     color: "#B3FAFF",
+    image: require("../../../../assets/png/signup-shield-tick.png"),
     path: "register/insurance",
   },
 ];
@@ -47,18 +57,11 @@ export default function Register() {
               onPress={() => navigation.navigate(item.path as never)}
               style={({ pressed }) => [
                 {
-                  padding: 37,
+                  padding: 51,
                   backgroundColor: item.color,
                   borderRadius: 12,
                   alignItems: "center",
-                  gap: 5,
-
-                  // shadow
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.08,
-                  shadowRadius: 10,
-                  elevation: 4,
+                  gap: 10,
 
                   // press effect
                   transform: [{ scale: pressed ? 0.97 : 1 }],
@@ -66,6 +69,7 @@ export default function Register() {
                 },
               ]}
             >
+              <Image source={item.image} />
               <Text style={styles.cardTitle}>{item.title}</Text>
               <Text style={styles.cardDesc}>{item.desc}</Text>
             </Pressable>

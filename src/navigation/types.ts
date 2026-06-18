@@ -6,4 +6,6 @@ export type RootStackParamList = {
   individual: undefined;
   policy: undefined;
   terms: undefined;
+  verify: undefined;
+  forgot: undefined
 };
