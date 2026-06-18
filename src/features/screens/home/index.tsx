@@ -4,6 +4,9 @@ import AppButton from "../../../components/button";
 import Slide1 from "../../../assets/png/fuelPump.png";
 import Slide2 from "../../../assets/png/mainContainer.png";
 import Slide3 from "../../../assets/png/thirs.png";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../../../navigation/types";
 
 const slides = [
   {
@@ -23,7 +26,10 @@ const slides = [
   },
 ];
 
+type NavProp = NativeStackNavigationProp<RootStackParamList>;
+
 export default function Home() {
+const navigation = useNavigation<NavProp>();
   const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
@@ -101,13 +107,14 @@ export default function Home() {
         backgroundColor={"#540863"}
         textColor={"#fff"}
         title={"Sign up for free"}
-        onPress={function (): void {
-          throw new Error("Function not implemented.");
-        }}
+        onPress={() =>navigation.navigate("register")}
       />
 
       <Text style={{ textAlign: "center", marginTop: 17.5 }}>
-        Already have an account? <Text style={styles.loginText}>Login</Text>
+        Already have an account? <Text style={styles.loginText} 
+        onPress={() => navigation.navigate('login')}
+        
+        >Login</Text>
       </Text>
 
       <View
@@ -115,18 +122,20 @@ export default function Home() {
           marginTop: 50,
           alignItems: "center",
           justifyContent: "center",
-          width: "60%",
+          width: "75%",
           alignSelf: "center",
+          marginBottom: 50,
+
         }}
       >
         <Text style={{ textAlign: "center", marginTop: 17.5 }}>
           By continuing, you agree to our{" "}
           <Text style={{ color: "#540863", fontWeight: "bold" }}>
-            Terms of Service
+             Privacy Policy 
           </Text>{" "}
           and{" "}
           <Text style={{ color: "#540863", fontWeight: "bold" }}>
-            Privacy Policy
+            Terms of Service  
           </Text>
           .
         </Text>
@@ -139,7 +148,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingVertical: 27,
-    paddingHorizontal: 20,
+    paddingHorizontal: 35,
   },
   topContainer: {
     display: "flex",
@@ -163,24 +172,26 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "bold",
   },
-
   title: {
     fontSize: 24,
-    fontWeight: "bold",
     color: "#000",
     textAlign: "center",
+    fontFamily: "BricolageGrotesque",
+    fontWeight: "bold",
+
   },
 
   desc: {
     fontSize: 14,
     color: "#5E5E5E",
     textAlign: "center",
-    width: 300,
+    width: 250,
     marginVertical: 14,
   },
   loginText: {
     color: "#540863",
     fontWeight: "bold",
     cursor: "pointer",
+ 
   },
 });

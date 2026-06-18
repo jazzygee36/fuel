@@ -1,11 +1,20 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
-import Home from './src/features/screens/home';
+import { NavigationContainer } from "@react-navigation/native";
+import { useFonts } from "expo-font";
+import RootNavigator from "./src/navigation/rootNavigator";
 
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    BricolageGrotesque: require("./src/assets/fonts/BricolageGrotesque-Regular.ttf"),
+    BricolageGrotesqueBold: require("./src/assets/fonts/BricolageGrotesque-Bold.ttf"),
+  });
+
+  if (!fontsLoaded) {
+    return null;
+  }
+
   return (
-    <Home />
+    <NavigationContainer>
+      <RootNavigator />
+    </NavigationContainer>
   );
 }
-
-
