@@ -7,5 +7,6 @@ export type RootStackParamList = {
   policy: undefined;
   terms: undefined;
   verify: undefined;
-  forgot: undefined
+  forgot: undefined;
+  newpassword: undefined;
 };
