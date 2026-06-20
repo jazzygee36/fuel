@@ -4,12 +4,12 @@ import { RootStackParamList } from "../../../navigation/types";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 interface Props {
-  handleFundWallet?: () => void;
+  setStep: React.Dispatch<React.SetStateAction<number>>;
 }
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-export default function FundWallet({ handleFundWallet }: Props) {
+export default function FundWallet({ setStep }: Props) {
   const navigation = useNavigation<NavigationProp>();
 
   return (
@@ -21,8 +21,7 @@ export default function FundWallet({ handleFundWallet }: Props) {
 
       <Pressable
         onPress={() => {
-          navigation.navigate("Wallet");
-          handleFundWallet?.();
+          setStep(2);
         }}
       >
         <Text style={styles.fundWallet}>Fund Wallet</Text>

@@ -6,11 +6,7 @@ import TextInputField from "../../../components/textInputField";
 import AppButton from "../../../components/button";
 
 export default function Wallet() {
-  const [fundWallet, setFundWallet] = useState(true);
-
-  const handleFundWallet = () => {
-    setFundWallet(false);
-  };
+  const [step, setStep] = useState<number>(1);
 
   return (
     <View style={styles.screen}>
@@ -21,13 +17,13 @@ export default function Wallet() {
         <View style={styles.wallet}>
           <BackArrow />
           <Text style={styles.walletText}>
-            {fundWallet ? "Wallet" : "Fund wallet"}
+            {step === 1 ? "Wallet" : "Fund wallet"}
           </Text>
         </View>
 
-        {fundWallet ? (
+        {step === 1 && (
           <View>
-            <FundWallet handleFundWallet={handleFundWallet} />
+            <FundWallet setStep={setStep} />
 
             <View style={styles.virtualAccount}>
               <View>
@@ -44,24 +40,25 @@ export default function Wallet() {
               </View>
             </View>
           </View>
-        ) : (
+        )}
+
+        {step === 2 && (
           <View>
             <Text style={styles.amountText}>
               How much would you like to fund?
             </Text>
             <TextInputField placeholder="Enter amount" />
+            <View style={styles.footer}>
+              <AppButton
+                backgroundColor="#540863"
+                textColor="#fff"
+                title="Continue"
+                onPress={() => {}}
+              />
+            </View>
           </View>
         )}
       </ScrollView>
-
-      <View style={styles.footer}>
-        <AppButton
-          backgroundColor="#540863"
-          textColor="#fff"
-          title="Continue"
-          onPress={() => {}}
-        />
-      </View>
     </View>
   );
 }
@@ -119,6 +116,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
     backgroundColor: "#fff",
-   
   },
 });

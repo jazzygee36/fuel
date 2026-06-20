@@ -1,12 +1,5 @@
 import React, { useRef } from "react";
-import {
-  Pressable,
-  Text,
-  StyleSheet,
-  Animated,
-  ViewStyle,
-  TextStyle,
-} from "react-native";
+import { Pressable, Text, StyleSheet, Animated } from "react-native";
 import { ButtonProps } from "../utils/types";
 
 const AppButton = ({

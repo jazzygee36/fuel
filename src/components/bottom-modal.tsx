@@ -1,6 +1,5 @@
 import React from "react";
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import AppButton from "./button";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/types";
@@ -8,10 +7,19 @@ import { RootStackParamList } from "../navigation/types";
 interface BottomModalProps {
   visible: boolean;
   onClose: () => void;
+  title: string;
+  description: string;
+  btn: React.ReactNode;
 }
 type NavProp = NativeStackNavigationProp<RootStackParamList>;
 
-export default function BottomModal({ visible, onClose }: BottomModalProps) {
+export default function BottomModal({
+  visible,
+  onClose,
+  title,
+  description,
+  btn,
+}: BottomModalProps) {
   const navigation = useNavigation<NavProp>();
   return (
     <Modal
@@ -28,12 +36,10 @@ export default function BottomModal({ visible, onClose }: BottomModalProps) {
         <TouchableOpacity activeOpacity={1} style={styles.content}>
           <View style={styles.handle} />
 
-          <Text style={styles.title}>Email Confirmed</Text>
+          <Text style={styles.title}>{title}</Text>
 
-          <Text style={styles.description}>
-            We’ve been able to successfully confirm your email address
-          </Text>
-          <AppButton
+          <Text style={styles.description}>{description}</Text>
+          {/* <AppButton
             backgroundColor={"#540863"}
             textColor="#fff"
             title="Confirm code"
@@ -41,7 +47,8 @@ export default function BottomModal({ visible, onClose }: BottomModalProps) {
             onPress={() => {
               (onClose(), navigation.navigate("login"));
             }}
-          />
+          /> */}
+          {btn}
         </TouchableOpacity>
       </TouchableOpacity>
     </Modal>

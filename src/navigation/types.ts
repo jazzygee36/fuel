@@ -11,4 +11,14 @@ export type RootStackParamList = {
   newpassword: undefined;
   app: undefined;
   Wallet: undefined;
+  Settings: undefined;
+  AccountSettings: undefined;
+  VehicleSettings: undefined;
+  Favourites: undefined;
+  Referral: undefined;
+  SecuritySettings: undefined;
+  UpdateTransactionPin: undefined;
+  ChangePasswordPin: undefined;
+  ReferralSettings: undefined;
+  HelpSupport: undefined;
 };

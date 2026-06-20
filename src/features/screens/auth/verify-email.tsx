@@ -132,7 +132,23 @@ export default function VerifyEmail({ length = 4, onComplete }: OtpInputProps) {
           </Text>
         </Text>
       </View>
-      <BottomModal visible={showModal} onClose={() => setShowModal(false)} />
+      <BottomModal
+        visible={showModal}
+        onClose={() => setShowModal(false)}
+        title={"Email Confirmed"}
+        description={
+          "We’ve been able to successfully confirm your email address"
+        }
+        btn={
+          <AppButton
+            backgroundColor={"#540863"}
+            textColor="#fff"
+            title="Confirm code"
+            // disabled={!isOtpComplete}
+            onPress={() => {}}
+          />
+        }
+      />
     </View>
   );
 }
