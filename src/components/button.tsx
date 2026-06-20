@@ -17,6 +17,7 @@ const AppButton = ({
   style,
   textStyle,
   disabled = false,
+  variant = "filled",
 }: ButtonProps) => {
   const scaleValue = useRef(new Animated.Value(1)).current;
 
@@ -40,16 +41,32 @@ const AppButton = ({
       disabled={disabled}
       onPressIn={onPressIn}
       onPressOut={onPressOut}
+      style={[{ width: "100%" }, style]}
     >
       <Animated.View
         style={[
           styles.button,
-          { backgroundColor: disabled ? "#ccc" : backgroundColor },
+          variant === "outlined"
+            ? {
+                backgroundColor: "transparent",
+                borderWidth: 1.5,
+                borderColor: "#000",
+              }
+            : { backgroundColor: disabled ? "#ccc" : backgroundColor },
+
           { transform: [{ scale: scaleValue }] },
-          style,
+          textStyle,
         ]}
       >
-        <Text style={[styles.text, { color: textColor }, textStyle]}>
+        <Text
+          style={[
+            styles.text,
+            {
+              color: variant === "outlined" ? "#000" : textColor,
+            },
+            textStyle,
+          ]}
+        >
           {title}
         </Text>
       </Animated.View>
@@ -66,6 +83,7 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     alignItems: "center",
     justifyContent: "center",
+    alignSelf: "stretch",
   },
   text: {
     fontSize: 16,

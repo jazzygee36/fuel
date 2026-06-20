@@ -2,6 +2,8 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Text, View } from "react-native";
 import Dashboard from "../features/screens/dashboard";
 import { Ionicons } from "@expo/vector-icons";
+import Wallet from "../features/screens/wallet";
+import Settings from "../features/screens/settings";
 
 const Tab = createBottomTabNavigator();
 
@@ -51,9 +53,9 @@ export default function AppTabs() {
     >
       <Tab.Screen name="Home" component={Dashboard} />
       <Tab.Screen name="Stations" component={Dashboard} />
-      <Tab.Screen name="Wallet" component={Dashboard} />
+      <Tab.Screen name="Wallet" component={Wallet} />
       <Tab.Screen name="Insure" component={Dashboard} />
-      <Tab.Screen name="Settings" component={Dashboard} />
+      <Tab.Screen name="Settings" component={Settings} />
     </Tab.Navigator>
   );
 }

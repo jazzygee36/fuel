@@ -1,8 +1,19 @@
-import { ScrollView, View, StyleSheet, Text, Image } from "react-native";
+import {
+  ScrollView,
+  View,
+  StyleSheet,
+  Text,
+  Image,
+  TouchableOpacity,
+} from "react-native";
 import TextInputField from "../../../components/textInputField";
 import { useState } from "react";
+import ReuseableBottomModal from "../../../components/reuseable-bottom-modal";
+import AppButton from "../../../components/button";
+import FundWallet from "../wallet/fund-wallet";
 
 export default function Dashboard() {
+  const [open, setOpen] = useState(false);
   const [ads, setAds] = useState([
     {
       id: 1,
@@ -69,16 +80,7 @@ export default function Dashboard() {
         <View style={styles.searchIconCircle} />
       </View>
 
-      <View style={styles.balanceCard}>
-        <View>
-          <Text style={styles.balanceLabel}>Total Balance</Text>
-          <Text style={styles.balanceAmount}>₦25,000</Text>
-        </View>
-
-        <View>
-          <Text style={styles.fundWallet}>Fund Wallet</Text>
-        </View>
-      </View>
+      <FundWallet />
       <View style={styles.stationsMap}>
         <View style={styles.station}>
           <Image
@@ -110,10 +112,13 @@ export default function Dashboard() {
         <View>
           <Text style={styles.verifyText}>Verify your identity</Text>
         </View>
-        <View style={styles.verifyContinue}>
+        <TouchableOpacity
+          style={styles.verifyContinue}
+          onPress={() => setOpen(true)}
+        >
           <Text style={styles.verifyText}>Continue</Text>
           <View style={styles.continueArrow}></View>
-        </View>
+        </TouchableOpacity>
       </View>
       {ads.map((ad) => (
         <View key={ad.id} style={styles.advertCard}>
@@ -128,6 +133,31 @@ export default function Dashboard() {
           </View>
         </View>
       ))}
+
+      <ReuseableBottomModal
+        visible={open}
+        title="Your business location"
+        onClose={() => setOpen(false)}
+      >
+        <TextInputField placeholder="State" label="State" />
+        <TextInputField placeholder="City" label="City" />
+        <View style={styles.btnGroup}>
+          <AppButton
+            title="Cancel"
+            variant="outlined"
+            style={styles.btnHalf}
+            onPress={() => setOpen(false)}
+          />
+
+          <AppButton
+            title="Save"
+            variant="filled"
+            backgroundColor="#540863"
+            style={styles.btnHalf}
+            onPress={() => {}}
+          />
+        </View>
+      </ReuseableBottomModal>
     </ScrollView>
   );
 }
@@ -137,7 +167,7 @@ const styles = StyleSheet.create({
     paddingVertical: 27,
     paddingHorizontal: 20,
     paddingBottom: 120,
-    backgroundColor:'#fff'
+    backgroundColor: "#fff",
   },
 
   flexDiv: {
@@ -293,5 +323,14 @@ const styles = StyleSheet.create({
     textAlign: "right",
     justifyContent: "flex-end",
     cursor: "pointer",
+  },
+  btnGroup: {
+    flexDirection: "row",
+    width: "100%",
+    gap: 12,
+    marginTop: 20,
+  },
+  btnHalf: {
+    flex: 1,
   },
 });

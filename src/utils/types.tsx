@@ -1,4 +1,4 @@
-import {  ViewStyle, TextStyle } from "react-native";
+import { ViewStyle, TextStyle } from "react-native";
 export type ButtonProps = {
   title: string;
   onPress: () => void;
@@ -7,4 +7,5 @@ export type ButtonProps = {
   style?: ViewStyle;
   textStyle?: TextStyle;
   disabled?: boolean;
+  variant?: "filled" | "outlined";
 };
