@@ -6,14 +6,18 @@ import {
   StyleSheet,
   TextInputProps,
   TouchableOpacity,
+  ViewStyle,
+  StyleProp,
+  TextStyle,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 interface Props extends TextInputProps {
-  label: string;
+  label?: string;
   isPassword?: boolean;
-  inputStyle?: object;
+  inputStyle?: StyleProp<TextStyle>;
   placeholder?: string;
+  height?: number;
 }
 
 export default function TextInputField({
@@ -21,26 +25,24 @@ export default function TextInputField({
   isPassword = false,
   inputStyle,
   placeholder,
+  height = 60,
   ...props
 }: Props) {
   const [hidePassword, setHidePassword] = useState(true);
 
   return (
     <View style={styles.container}>
-      {/* Label */}
-      <Text style={styles.label}>{label}</Text>
+      {label ? <Text style={styles.label}>{label}</Text> : null}
 
-      {/* Input wrapper */}
-      <View style={styles.inputWrapper}>
+      <View style={[styles.inputWrapper, { height }]}>
         <TextInput
           style={[styles.input, inputStyle]}
           secureTextEntry={isPassword ? hidePassword : false}
-          // placeholderTextColor="#999"
           placeholder={placeholder}
+          placeholderTextColor="#999"
           {...props}
         />
 
-        {/* Eye Icon */}
         {isPassword && (
           <TouchableOpacity
             onPress={() => setHidePassword(!hidePassword)}
@@ -75,7 +77,6 @@ const styles = StyleSheet.create({
     borderColor: "#D0D5DD",
     borderRadius: 10,
     paddingHorizontal: 12,
-    height: 60,
     backgroundColor: "transparent",
   },
   input: {

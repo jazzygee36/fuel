@@ -15,7 +15,7 @@ import BackArrow from "../../../components/back-arrow";
 
 // import { Image } from "react-native-svg";
 
-type NavigationProp = NativeStackNavigationProp<RootStackParamList, "login">;
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function Login() {
   const navigation = useNavigation<NavigationProp>();
@@ -52,7 +52,7 @@ export default function Login() {
           backgroundColor="#909194"
           textColor="#fff"
           title="Login"
-          onPress={() => {}}
+          onPress={() => {navigation.replace('app')}}
         />
         <Text style={{ textAlign: "center", marginTop: 17.5 }}>
           Don't have an account?{" "}

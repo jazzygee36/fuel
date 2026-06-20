@@ -9,4 +9,5 @@ export type RootStackParamList = {
   verify: undefined;
   forgot: undefined;
   newpassword: undefined;
+  app: undefined;
 };

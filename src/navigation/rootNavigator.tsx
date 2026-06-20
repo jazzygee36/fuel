@@ -11,6 +11,7 @@ import Terms from "../features/screens/terms";
 import VerifyEmail from "../features/screens/auth/verify-email";
 import ForgotPassword from "../features/screens/auth/forgot-password";
 import NewPassword from "../features/screens/new-password";
+import AppTabs from "./AppTabs";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -24,6 +25,7 @@ export default function RootNavigator() {
         },
       }}
     >
+      {/* AUTH SCREENS */}
       <Stack.Screen name="home" component={Home} />
       <Stack.Screen name="login" component={Login} />
       <Stack.Screen name="register" component={Register} />
@@ -33,7 +35,13 @@ export default function RootNavigator() {
       <Stack.Screen name="individual" component={Individual} />
       <Stack.Screen name="policy" component={Policy} />
       <Stack.Screen name="terms" component={Terms} />
-      <Stack.Screen name="dashboard" component={Dashboard} />
+
+      {/* APP (BOTTOM NAV BAR) */}
+      <Stack.Screen
+        name="app"
+        component={AppTabs}
+        options={{ headerShown: false }}
+      />
     </Stack.Navigator>
   );
 }
