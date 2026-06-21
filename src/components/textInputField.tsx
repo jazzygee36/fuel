@@ -18,6 +18,7 @@ interface Props extends TextInputProps {
   inputStyle?: StyleProp<TextStyle>;
   placeholder?: string;
   height?: number;
+  borderWidth?: number
 }
 
 export default function TextInputField({
@@ -26,6 +27,7 @@ export default function TextInputField({
   inputStyle,
   placeholder,
   height = 60,
+  borderWidth=1,
   ...props
 }: Props) {
   const [hidePassword, setHidePassword] = useState(true);
@@ -34,7 +36,7 @@ export default function TextInputField({
     <View style={styles.container}>
       {label ? <Text style={styles.label}>{label}</Text> : null}
 
-      <View style={[styles.inputWrapper, { height }]}>
+      <View style={[styles.inputWrapper, { height, borderWidth }]}>
         <TextInput
           style={[styles.input, inputStyle]}
           secureTextEntry={isPassword ? hidePassword : false}
@@ -73,17 +75,19 @@ const styles = StyleSheet.create({
   inputWrapper: {
     flexDirection: "row",
     alignItems: "center",
-    borderWidth: 1,
+    // borderWidth: 1,
     borderColor: "#D0D5DD",
     borderRadius: 10,
     paddingHorizontal: 12,
     backgroundColor: "transparent",
+    // outlineColor: "none",
   },
   input: {
     flex: 1,
     fontSize: 15,
     color: "#000",
     outlineColor: "transparent",
+    
   },
   icon: {
     paddingLeft: 10,

@@ -20,5 +20,6 @@ export type RootStackParamList = {
   UpdateTransactionPin: undefined;
   ChangePasswordPin: undefined;
   ReferralSettings: undefined;
+  FavouriteSettings: undefined;
   HelpSupport: undefined;
 };

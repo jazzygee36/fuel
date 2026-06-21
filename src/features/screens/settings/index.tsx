@@ -11,6 +11,9 @@ import { Ionicons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../../navigation/types";
+import BottomModal from "../../../components/bottom-modal";
+import { useState } from "react";
+import AppButton from "../../../components/button";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -37,7 +40,7 @@ const settingsData = [
   {
     title: "Favourites",
     icon: <Ionicons name="bookmark" size={20} color="#58B9E8" />,
-    route: "Favourites",
+    route: "FavouriteSettings",
   },
   {
     title: "Referral",
@@ -60,6 +63,7 @@ const settingsData = [
 
 export default function Settings() {
   const navigation = useNavigation<NavigationProp>();
+  const [logoutModal, setLogoutModal] = useState(false);
 
   return (
     <View style={styles.screen}>
@@ -135,7 +139,10 @@ export default function Settings() {
           ))}
 
           {/* Logout */}
-          <Pressable style={[styles.row, styles.logoutRow]}>
+          <Pressable
+            style={[styles.row, styles.logoutRow]}
+            onPress={() => setLogoutModal(true)}
+          >
             <View style={styles.leftSection}>
               <Ionicons name="log-out-outline" size={22} color="#FF2D55" />
               <Text style={styles.logoutText}>Log Out</Text>
@@ -145,6 +152,27 @@ export default function Settings() {
           </Pressable>
         </View>
       </ScrollView>
+      <BottomModal
+        visible={logoutModal}
+        onClose={() => setLogoutModal(false)}
+        title={"Log out?"}
+        description=" Are you sure you want to log out?"
+      >
+        <View style={{ gap: 20 }}>
+          <AppButton
+            title={"Cancel"}
+            variant="outlined"
+            onPress={() => setLogoutModal(false)}
+          />
+          <AppButton
+            title={"Logout"}
+            backgroundColor="#540863"
+            onPress={() => {
+              (setLogoutModal(false), navigation.navigate("login"));
+            }}
+          />
+        </View>
+      </BottomModal>
     </View>
   );
 }

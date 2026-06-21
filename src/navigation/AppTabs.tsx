@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import Wallet from "../features/screens/wallet";
 import Settings from "../features/screens/settings";
 import SettingsStack from "./settings-stack";
+import Stations from "../features/screens/stations";
 
 const Tab = createBottomTabNavigator();
 
@@ -30,7 +31,7 @@ export default function AppTabs() {
           fontWeight: "600",
         },
 
-        tabBarActiveTintColor: "#151B23",
+        tabBarActiveTintColor: "#540863",
         tabBarInactiveTintColor: "#000000",
 
         tabBarIcon: ({ focused, color, size }) => {
@@ -53,7 +54,7 @@ export default function AppTabs() {
       })}
     >
       <Tab.Screen name="Home" component={Dashboard} />
-      <Tab.Screen name="Stations" component={Dashboard} />
+      <Tab.Screen name="Stations" component={Stations} />
       <Tab.Screen name="Wallet" component={Wallet} />
       <Tab.Screen name="Insure" component={Dashboard} />
       <Tab.Screen name="Settings" component={SettingsStack} />

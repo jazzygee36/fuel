@@ -7,6 +7,7 @@ import SecuritySettings from "../features/screens/settings/security";
 import UpdateTransactionPin from "../features/screens/settings/update-transaction-pin";
 import ChangePasswordPin from "../features/screens/settings/change-login-pin";
 import ReferralSettings from "../features/screens/settings/referral";
+import FavouriteSettings from "../features/screens/settings/favourites";
 
 const Stack = createNativeStackNavigator();
 
@@ -20,6 +21,7 @@ export default function SettingsStack() {
       <Stack.Screen name="UpdateTransactionPin" component={UpdateTransactionPin} />
       <Stack.Screen name="ChangePasswordPin" component={ChangePasswordPin} />
       <Stack.Screen name="ReferralSettings" component={ReferralSettings} />
+      <Stack.Screen name="FavouriteSettings" component={FavouriteSettings} />
     </Stack.Navigator>
   );
 }

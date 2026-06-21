@@ -7,10 +7,11 @@ import {
   TouchableOpacity,
 } from "react-native";
 import TextInputField from "../../../components/textInputField";
-import { useState } from "react";
+import { SetStateAction, useState } from "react";
 import ReuseableBottomModal from "../../../components/reuseable-bottom-modal";
 import AppButton from "../../../components/button";
 import FundWallet from "../wallet/fund-wallet";
+import SearchBar from "../../../components/search-bar";
 
 export default function Dashboard() {
   const [open, setOpen] = useState(false);
@@ -72,15 +73,9 @@ export default function Dashboard() {
           </View>
         </View>
       </View>
+      <SearchBar />
 
-      <View style={[styles.flexDiv, styles.searchRow]}>
-        <View style={styles.searchInputWrap}>
-          <TextInputField placeholder="Search name/location" height={50} />
-        </View>
-        <View style={styles.searchIconCircle} />
-      </View>
-
-      <FundWallet />
+      <FundWallet setStep={() => {}} />
       <View style={styles.stationsMap}>
         <View style={styles.station}>
           <Image
@@ -203,27 +198,6 @@ const styles = StyleSheet.create({
     color: "#76777A",
     fontSize: 12,
     fontWeight: "600",
-  },
-
-  searchRow: {
-    marginTop: 30,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-
-  searchInputWrap: {
-    flex: 1,
-    height: 50,
-    backgroundColor: "#F0F0F4",
-  },
-
-  searchIconCircle: {
-    width: 50,
-    height: 50,
-
-    borderRadius: 25,
-    backgroundColor: "#F0F0F4",
   },
 
   balanceCard: {
