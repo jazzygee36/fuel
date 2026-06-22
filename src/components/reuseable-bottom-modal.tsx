@@ -14,6 +14,7 @@ interface BottomModalProps {
   title: string;
   onClose: () => void;
   children: React.ReactNode;
+  description?: string;
 }
 
 export default function ReuseableBottomModal({
@@ -21,6 +22,7 @@ export default function ReuseableBottomModal({
   title,
   onClose,
   children,
+  description,
 }: BottomModalProps) {
   return (
     <Modal
@@ -34,7 +36,6 @@ export default function ReuseableBottomModal({
 
       {/* Modal content */}
       <View style={styles.modalContainer}>
-        
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>{title}</Text>
@@ -43,10 +44,10 @@ export default function ReuseableBottomModal({
             <Ionicons name="close" size={22} color="#000" />
           </TouchableOpacity>
         </View>
+        <Text style={styles.description}>{description}</Text>
 
         {/* Body */}
         <View style={styles.body}>{children}</View>
-
       </View>
     </Modal>
   );
@@ -73,14 +74,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 15,
   },
 
   title: {
     fontSize: 16,
     fontWeight: "600",
     color: "#000000",
-    fontFamily: 'BricolageGrotesque'
+    fontFamily: "BricolageGrotesque",
   },
 
   closeBtn: {
@@ -89,5 +89,10 @@ const styles = StyleSheet.create({
 
   body: {
     paddingBottom: 20,
+  },
+  description: {
+    // textAlign: "center",
+    color: "#000000",
+    marginBottom: 32,
   },
 });

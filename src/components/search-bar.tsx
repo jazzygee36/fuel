@@ -1,23 +1,36 @@
-import { View, StyleSheet, Image } from "react-native";
+import React from "react";
+import { View, StyleSheet, Image, TouchableOpacity } from "react-native";
 import TextInputField from "./textInputField";
 
-export default function SearchBar() {
+interface Props {
+  searchIcon?: boolean;
+  placeholder: string;
+  onPress?: () => void;
+}
+
+export default function SearchBar({
+  searchIcon = true,
+  placeholder,
+  onPress,
+}: Props) {
   return (
     <View style={[styles.flexDiv, styles.searchRow]}>
       <View style={styles.searchInputWrap}>
         <TextInputField
-          placeholder="Search name/location"
+          placeholder={placeholder}
           height={50}
           borderWidth={0}
         />
       </View>
-      <View style={styles.searchIconCircle}>
-        <Image
-          source={require("../assets/png/settingIcon.png")}
-          // style={styles.stationImage}
-          resizeMode="cover"
-        />
-      </View>
+
+      {searchIcon && (
+        <TouchableOpacity style={styles.searchIconCircle} onPress={onPress}>
+          <Image
+            source={require("../assets/png/settingIcon.png")}
+            resizeMode="cover"
+          />
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -30,7 +43,7 @@ const styles = StyleSheet.create({
   },
 
   searchRow: {
-    marginTop: 30,
+    marginVertical: 0,
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
@@ -46,11 +59,9 @@ const styles = StyleSheet.create({
   searchIconCircle: {
     width: 50,
     height: 50,
-    flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 25,
     backgroundColor: "#F0F0F4",
-    cursor: "pointer",
   },
 });

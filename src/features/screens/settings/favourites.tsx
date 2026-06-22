@@ -100,7 +100,7 @@ export default function FavouriteSettings() {
   const renderHeader = () => (
     <>
       <SettingsHeader title="Favourites" />
-      <SearchBar />
+      <SearchBar placeholder={""} />
 
       <FlatList
         data={fuelTabs}

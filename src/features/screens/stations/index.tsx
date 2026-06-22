@@ -12,6 +12,8 @@ import {
 import SearchBar from "../../../components/search-bar";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import SettingsHeader from "../settings/header";
+import ReuseableBottomModal from "../../../components/reuseable-bottom-modal";
+import FileterModal from "../dashboard/filter-moda";
 
 const fuelTabs = ["Petrol", "Diesel", "Gas", "CNG", "Engine Oil"];
 
@@ -22,6 +24,7 @@ type Station = {
   status: string;
   logo: any;
   favorite?: boolean;
+  func?: string;
 };
 
 const stations: Station[] = [
@@ -32,6 +35,7 @@ const stations: Station[] = [
     status: "Open 24hrs",
     logo: require("../../../assets/png/mrsIcon.png"),
     favorite: true,
+    func: "Open",
   },
   {
     id: 2,
@@ -40,6 +44,7 @@ const stations: Station[] = [
     status: "Open 24hrs",
     logo: require("../../../assets/png/mrsIcon.png"),
     favorite: true,
+    func: "Open",
   },
   {
     id: 3,
@@ -48,6 +53,7 @@ const stations: Station[] = [
     status: "Open 24hrs",
     logo: require("../../../assets/png/mrsIcon.png"),
     favorite: true,
+    func: "Close",
   },
   {
     id: 4,
@@ -56,12 +62,14 @@ const stations: Station[] = [
     status: "Open 24hrs",
     logo: require("../../../assets/png/mrsIcon.png"),
     favorite: false,
+    func: "Close",
   },
 ];
 
 export default function Stations() {
   const [activeTab, setActiveTab] = useState("Petrol");
   const [stationList, setStationList] = useState<Station[]>(stations);
+  const [openFilterModal, setOpenFilterModal] = useState(false);
 
   const toggleFavorite = (id: number) => {
     setStationList((prev) =>
@@ -88,20 +96,24 @@ export default function Stations() {
         </View>
       </View>
 
-      <TouchableOpacity onPress={() => toggleFavorite(item.id)}>
-        <Ionicons
-          name={item.favorite ? "heart" : "heart-outline"}
-          size={24}
-          color="#FF1E56"
-        />
-      </TouchableOpacity>
+      <View>
+        <View style={styles.officeHourContainer}>
+          <Text style={styles.officeHour}>{item.func}</Text>
+        </View>
+        <Text style={{ marginTop: 8 }}>₦720/L</Text>
+      </View>
     </View>
   );
 
   const renderHeader = () => (
     <>
       <SettingsHeader title="List of Fuel Stations" />
-      <SearchBar />
+      <SearchBar
+        placeholder="Search name/location"
+        onPress={() => {
+          setOpenFilterModal(true);
+        }}
+      />
 
       <FlatList
         data={fuelTabs}
@@ -127,6 +139,13 @@ export default function Stations() {
           );
         }}
       />
+      <ReuseableBottomModal
+        visible={openFilterModal}
+        title="Filter"
+        onClose={() => setOpenFilterModal(false)}
+      >
+        <FileterModal setOpenFilterModal={setOpenFilterModal} />
+      </ReuseableBottomModal>
     </>
   );
 
@@ -228,5 +247,16 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
     color: "#8E8E93",
     fontSize: 14,
+  },
+  officeHourContainer: {
+    backgroundColor: "#C0FEB8",
+    paddingVertical: 4.5,
+    paddingHorizontal: 12,
+    borderRadius: 50,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  officeHour: {
+    color: "#29A329",
   },
 });

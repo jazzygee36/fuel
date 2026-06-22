@@ -5,6 +5,7 @@ import {
   Text,
   Image,
   TouchableOpacity,
+  Pressable,
 } from "react-native";
 import TextInputField from "../../../components/textInputField";
 import { SetStateAction, useState } from "react";
@@ -12,9 +13,20 @@ import ReuseableBottomModal from "../../../components/reuseable-bottom-modal";
 import AppButton from "../../../components/button";
 import FundWallet from "../wallet/fund-wallet";
 import SearchBar from "../../../components/search-bar";
+import ContinueModal from "./continue-modal";
+import FileterModal from "./filter-moda";
+import VerificationModal from "./verification-modal";
+import { useNavigation } from "@react-navigation/native";
+import { RootStackParamList } from "../../../navigation/types";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function Dashboard() {
+  const navigation = useNavigation<NavigationProp>();
+
   const [open, setOpen] = useState(false);
+  const [openFilterModal, setOpenFilterModal] = useState(false);
+  const [verifyModal, setVerifyModal] = useState(false);
   const [ads, setAds] = useState([
     {
       id: 1,
@@ -57,13 +69,13 @@ export default function Dashboard() {
         </View>
 
         <View style={styles.flexCircle}>
-          <View style={styles.circle}>
+          <Pressable style={styles.circle}>
             <Image
               source={require("../../../assets/png/message.png")}
               // style={styles.stationImage}
               resizeMode="cover"
             />
-          </View>
+          </Pressable>
           <View style={styles.circle}>
             <Image
               source={require("../../../assets/png/notify.png")}
@@ -73,33 +85,42 @@ export default function Dashboard() {
           </View>
         </View>
       </View>
-      <SearchBar />
+      <SearchBar
+        placeholder="Search name/location"
+        onPress={() => setOpenFilterModal(true)}
+      />
 
-      <FundWallet setStep={() => {}} />
+      <View style={{ marginTop: 25 }}>
+        <FundWallet setStep={() => {}} />
+      </View>
       <View style={styles.stationsMap}>
         <View style={styles.station}>
-          <Image
-            source={require("../../../assets/png/fuelStation.png")}
-            // style={styles.stationImage}
-            resizeMode="cover"
-          />
+          <Pressable onPress={() => navigation.navigate("Stations")}>
+            <Image
+              source={require("../../../assets/png/fuelStation.png")}
+              // style={styles.stationImage}
+              // resizeMode="cover"
+            />
+          </Pressable>
 
           <Image
             source={require("../../../assets/png/trans.png")}
             // style={styles.stationImage}
-            resizeMode="cover"
+            // resizeMode="cover"
           />
         </View>
         <View style={styles.station}>
+          <Pressable onPress={() => navigation.navigate("VehicleSettings")}>
+            <Image
+              source={require("../../../assets/png/vehicle.png")}
+              // style={styles.stationImage}
+              // resizeMode="cover"
+            />
+          </Pressable>
           <Image
-            source={require("../../../assets/png/vehicle.png")}
+            source={require("../../../assets/png/nearStation.png")}
             // style={styles.stationImage}
-            resizeMode="cover"
-          />
-          <Image
-            source={require("../../../assets/png/fuelStation.png")}
-            // style={styles.stationImage}
-            resizeMode="cover"
+            // resizeMode="cover"
           />
         </View>
       </View>
@@ -109,10 +130,14 @@ export default function Dashboard() {
         </View>
         <TouchableOpacity
           style={styles.verifyContinue}
-          onPress={() => setOpen(true)}
+          onPress={() => setVerifyModal(true)}
         >
           <Text style={styles.verifyText}>Continue</Text>
-          <View style={styles.continueArrow}></View>
+          <Image
+            source={require("../../../assets/png/continue.png")}
+            // style={styles.stationImage}
+            resizeMode="cover"
+          />
         </TouchableOpacity>
       </View>
       {ads.map((ad) => (
@@ -134,24 +159,22 @@ export default function Dashboard() {
         title="Your business location"
         onClose={() => setOpen(false)}
       >
-        <TextInputField placeholder="State" label="State" />
-        <TextInputField placeholder="City" label="City" />
-        <View style={styles.btnGroup}>
-          <AppButton
-            title="Cancel"
-            variant="outlined"
-            style={styles.btnHalf}
-            onPress={() => setOpen(false)}
-          />
-
-          <AppButton
-            title="Save"
-            variant="filled"
-            backgroundColor="#540863"
-            style={styles.btnHalf}
-            onPress={() => {}}
-          />
-        </View>
+        <ContinueModal setOpen={setOpen} />
+      </ReuseableBottomModal>
+      <ReuseableBottomModal
+        visible={openFilterModal}
+        title="Filter"
+        onClose={() => setOpenFilterModal(false)}
+      >
+        <FileterModal setOpenFilterModal={setOpenFilterModal} />
+      </ReuseableBottomModal>
+      <ReuseableBottomModal
+        visible={verifyModal}
+        title="Verify your Identity"
+        description="Important Notice"
+        onClose={() => setVerifyModal(false)}
+      >
+        <VerificationModal setVerifyModal={setVerifyModal} />
       </ReuseableBottomModal>
     </ScrollView>
   );
@@ -169,6 +192,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    marginBottom: 25,
   },
 
   flexCircle: {
@@ -186,6 +210,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
+    cursor: "pointer",
   },
 
   userName: {
@@ -238,8 +263,9 @@ const styles = StyleSheet.create({
   stationsMap: {
     marginTop: 19,
     flexDirection: "row",
-    justifyContent: "space-between",
-    gap: 13,
+    justifyContent: "space-around",
+    gap: 10,
+    alignItems: "center",
   },
   station: {
     flexDirection: "column",
@@ -297,14 +323,5 @@ const styles = StyleSheet.create({
     textAlign: "right",
     justifyContent: "flex-end",
     cursor: "pointer",
-  },
-  btnGroup: {
-    flexDirection: "row",
-    width: "100%",
-    gap: 12,
-    marginTop: 20,
-  },
-  btnHalf: {
-    flex: 1,
   },
 });

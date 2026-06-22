@@ -21,5 +21,7 @@ export type RootStackParamList = {
   ChangePasswordPin: undefined;
   ReferralSettings: undefined;
   FavouriteSettings: undefined;
+  Verification: undefined;
+  Stations: undefined;
   HelpSupport: undefined;
 };

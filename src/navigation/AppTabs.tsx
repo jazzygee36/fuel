@@ -58,6 +58,7 @@ export default function AppTabs() {
       <Tab.Screen name="Wallet" component={Wallet} />
       <Tab.Screen name="Insure" component={Dashboard} />
       <Tab.Screen name="Settings" component={SettingsStack} />
+      
     </Tab.Navigator>
   );
 }

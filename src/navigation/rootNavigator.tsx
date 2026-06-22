@@ -12,6 +12,9 @@ import VerifyEmail from "../features/screens/auth/verify-email";
 import ForgotPassword from "../features/screens/auth/forgot-password";
 import NewPassword from "../features/screens/new-password";
 import AppTabs from "./AppTabs";
+import Verification from "../features/screens/verification";
+import Stations from "../features/screens/stations";
+import VehicleSettings from "../features/screens/settings/my-vehicle";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -42,6 +45,9 @@ export default function RootNavigator() {
         component={AppTabs}
         options={{ headerShown: false }}
       />
+      <Stack.Screen name="Verification" component={Verification} />
+      <Stack.Screen name="Stations" component={Stations} />
+      <Stack.Screen name="VehicleSettings" component={VehicleSettings} />
     </Stack.Navigator>
   );
 }
