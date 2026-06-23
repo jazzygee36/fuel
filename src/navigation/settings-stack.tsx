@@ -9,6 +9,7 @@ import ChangePasswordPin from "../features/screens/settings/change-login-pin";
 import ReferralSettings from "../features/screens/settings/referral";
 import FavouriteSettings from "../features/screens/settings/favourites";
 import Verification from "../features/screens/verification";
+import HelpSupport from "../features/screens/settings/help-support";
 
 
 
@@ -29,6 +30,7 @@ export default function SettingsStack() {
       <Stack.Screen name="ReferralSettings" component={ReferralSettings} />
       <Stack.Screen name="FavouriteSettings" component={FavouriteSettings} />
       <Stack.Screen name="Verification" component={Verification} />
+      <Stack.Screen name="HelpSupport" component={HelpSupport} />
     </Stack.Navigator>
   );
 }

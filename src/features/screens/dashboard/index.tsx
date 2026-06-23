@@ -91,7 +91,9 @@ export default function Dashboard() {
       />
 
       <View style={{ marginTop: 25 }}>
-        <FundWallet setStep={() => {}} />
+        <Pressable onPress={() => navigation.navigate("Wallet")}>
+          <FundWallet setStep={() => {}} />
+        </Pressable>
       </View>
       <View style={styles.stationsMap}>
         <View style={styles.station}>

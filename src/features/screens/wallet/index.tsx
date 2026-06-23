@@ -8,6 +8,10 @@ import AppButton from "../../../components/button";
 export default function Wallet() {
   const [step, setStep] = useState<number>(1);
 
+  const handleStep = () => {
+    setStep(1)
+  }
+
   return (
     <View style={styles.screen}>
       <ScrollView
