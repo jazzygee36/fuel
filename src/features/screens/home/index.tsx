@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, View, Image } from "react-native";
 import AppButton from "../../../components/button";
-import Slide1 from "../../../assets/png/fuelPump.png";
-import Slide2 from "../../../assets/png/mainContainer.png";
-import Slide3 from "../../../assets/png/thirs.png";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../../navigation/types";
@@ -13,17 +10,17 @@ const slides = [
   {
     title: "Find fuel stations around you instantly",
     desc: "Browse nearby stations, compare prices, and choose where to fuel",
-    image: Slide1,
+    image: require("../../../assets/png/fuelPump.png"),
   },
   {
     title: "Pay for fuel from your phone",
     desc: "Fund your wallet and purchase petrol, diesel, gas, and more without cash or card stress.",
-    image: Slide2,
+    image: require("../../../assets/png/mainContainer.png"),
   },
   {
     title: "For individuals and businesses",
     desc: "Manage personal fueling or control company fuel expenses in one secure app.",
-    image: Slide3,
+    image: require("../../../assets/png/thirs.png"),
   },
 ];
 
@@ -34,17 +31,21 @@ export default function Home() {
   const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
+    let isMounted = true;
+
     const interval = setInterval(() => {
-      setActiveIndex((prev) => (prev + 1) % slides.length);
+      if (!isMounted) return;
+
+      setActiveIndex((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
     }, 3000);
 
-    return () => clearInterval(interval);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, []);
   return (
-    <ScrollView
-      contentContainerStyle={styles.container}
-      showsVerticalScrollIndicator={false}
-    >
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.topContainer}>
         <View
           style={{
@@ -66,10 +67,16 @@ export default function Home() {
             ))}
           </View>
         </View>
-        <Text style={styles.skipText}>Skip</Text>
+        <Text
+          style={styles.skipText}
+          onPress={() => navigation.replace("login")}
+        >
+          Skip
+        </Text>
       </View>
 
       <View
+        key={activeIndex}
         style={{
           backgroundColor: "#D7CBF2",
           height: 307.82,
@@ -78,7 +85,7 @@ export default function Home() {
           width: "80%",
           alignSelf: "center",
           justifyContent: "center",
-          alignItems: "center", // 👈 important
+          alignItems: "center",
         }}
       >
         <Image
@@ -88,6 +95,7 @@ export default function Home() {
             height: "70%",
             resizeMode: "contain",
           }}
+          fadeDuration={0}
         />
       </View>
 

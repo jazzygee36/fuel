@@ -23,5 +23,6 @@ export type RootStackParamList = {
   FavouriteSettings: undefined;
   Verification: undefined;
   Stations: undefined;
+  TransactionHistory:undefined;
   HelpSupport: undefined;
 };

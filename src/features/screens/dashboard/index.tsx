@@ -102,12 +102,13 @@ export default function Dashboard() {
               // resizeMode="cover"
             />
           </Pressable>
-
-          <Image
-            source={require("../../../assets/png/trans.png")}
-            // style={styles.stationImage}
-            // resizeMode="cover"
-          />
+          <Pressable onPress={() => navigation.navigate("TransactionHistory")}>
+            <Image
+              source={require("../../../assets/png/trans.png")}
+              // style={styles.stationImage}
+              // resizeMode="cover"
+            />
+          </Pressable>
         </View>
         <View style={styles.station}>
           <Pressable onPress={() => navigation.navigate("VehicleSettings")}>

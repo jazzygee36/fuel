@@ -135,7 +135,7 @@ export default function ForgotPassword({
           </Text>
         </Text>
       </View>
-      <BottomModal visible={showModal} onClose={() => setShowModal(false)} />
+      <BottomModal visible={showModal} onClose={() => setShowModal(false)} title={"Code"} />
     </View>
   );
 }

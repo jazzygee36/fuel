@@ -44,7 +44,7 @@ const stations: Station[] = [
     status: "Open 24hrs",
     logo: require("../../../assets/png/mrsIcon.png"),
     favorite: true,
-    func: "Open",
+    func: "Closed",
   },
   {
     id: 3,
@@ -53,7 +53,7 @@ const stations: Station[] = [
     status: "Open 24hrs",
     logo: require("../../../assets/png/mrsIcon.png"),
     favorite: true,
-    func: "Close",
+    func: "Open",
   },
   {
     id: 4,
@@ -62,7 +62,7 @@ const stations: Station[] = [
     status: "Open 24hrs",
     logo: require("../../../assets/png/mrsIcon.png"),
     favorite: false,
-    func: "Close",
+    func: "Closed",
   },
 ];
 
@@ -70,6 +70,8 @@ export default function Stations() {
   const [activeTab, setActiveTab] = useState("Petrol");
   const [stationList, setStationList] = useState<Station[]>(stations);
   const [openFilterModal, setOpenFilterModal] = useState(false);
+  const [selectedStation, setSelectedStation] = useState<Station | null>(null);
+  console.log("selectedStation", selectedStation);
 
   const toggleFavorite = (id: number) => {
     setStationList((prev) =>
@@ -79,31 +81,58 @@ export default function Stations() {
     );
   };
 
-  const renderStation: ListRenderItem<Station> = ({ item }) => (
-    <View style={styles.stationRow}>
-      <View style={styles.leftSection}>
-        <Image source={item.logo} style={styles.logo} />
+  const renderStation: ListRenderItem<Station> = ({ item }) => {
+    const isOpen = item.func === "Open";
 
-        <View style={styles.stationInfo}>
-          <Text style={styles.stationName}>{item.name}</Text>
+    return (
+      <TouchableOpacity
+        style={styles.stationRow}
+        onPress={() => setSelectedStation(item)}
+      >
+        {/* LEFT */}
+        <View style={styles.leftSection}>
+          <Image source={item.logo} style={styles.logo} />
 
-          <View style={styles.metaRow}>
-            <MaterialIcons name="location-pin" size={13} color="#E74C3C" />
-            <Text style={styles.metaText}>{item.distance}</Text>
-            <Text style={styles.metaDot}>•</Text>
-            <Text style={styles.metaText}>{item.status}</Text>
+          <View style={styles.stationInfo}>
+            <Text style={styles.stationName}>{item.name}</Text>
+
+            <View style={styles.metaRow}>
+              <MaterialIcons name="location-pin" size={13} color="#E74C3C" />
+              <Text style={styles.metaText}>{item.distance}</Text>
+              <Text style={styles.metaDot}>•</Text>
+              <Text style={styles.metaText}>{item.status}</Text>
+            </View>
           </View>
         </View>
-      </View>
 
-      <View>
-        <View style={styles.officeHourContainer}>
-          <Text style={styles.officeHour}>{item.func}</Text>
+        {/* RIGHT */}
+        <View>
+          <View
+            style={[
+              styles.officeHourContainer,
+              isOpen ? styles.openBadge : styles.closedBadge,
+            ]}
+          >
+            <Text
+              style={[
+                styles.officeHour,
+                isOpen ? styles.openText : styles.closedText,
+              ]}
+            >
+              {item.func}
+            </Text>
+          </View>
+
+          <View style={styles.imageLitre}>
+            <Image
+              source={require("../../../assets/png/gas-station-icon.png")}
+            />
+            <Text>₦720/L</Text>
+          </View>
         </View>
-        <Text style={{ marginTop: 8 }}>₦720/L</Text>
-      </View>
-    </View>
-  );
+      </TouchableOpacity>
+    );
+  };
 
   const renderHeader = () => (
     <>
@@ -249,14 +278,37 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   officeHourContainer: {
-    backgroundColor: "#C0FEB8",
-    paddingVertical: 4.5,
+    paddingVertical: 4,
     paddingHorizontal: 12,
     borderRadius: 50,
     justifyContent: "center",
     alignItems: "center",
   },
+
   officeHour: {
+    fontSize: 13,
+    fontWeight: "500",
+  },
+
+  openBadge: {
+    backgroundColor: "#C0FEB8",
+  },
+
+  closedBadge: {
+    backgroundColor: "#E2E2E5",
+  },
+
+  openText: {
     color: "#29A329",
+  },
+
+  closedText: {
+    color: "#76777A",
+  },
+  imageLitre: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 8,
   },
 });

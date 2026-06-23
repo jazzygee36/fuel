@@ -113,9 +113,7 @@ export default function Settings() {
             <Pressable
               key={index}
               style={styles.row}
-              onPress={() =>
-                navigation.navigate(item.route as keyof RootStackParamList)
-              }
+              onPress={() => navigation.navigate(item.route as never)}
             >
               <View style={styles.leftSection}>
                 <View style={styles.iconWrapper}>{item.icon}</View>

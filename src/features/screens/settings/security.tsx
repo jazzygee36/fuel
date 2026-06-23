@@ -52,7 +52,7 @@ export default function SecuritySettings() {
             key={index}
             style={styles.row}
             onPress={() =>
-              navigation.navigate(item.route as keyof RootStackParamList)
+              navigation.navigate(item.route as never)
             }
           >
             <View style={styles.leftSection}>

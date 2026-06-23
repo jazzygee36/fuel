@@ -15,6 +15,7 @@ import AppTabs from "./AppTabs";
 import Verification from "../features/screens/verification";
 import Stations from "../features/screens/stations";
 import VehicleSettings from "../features/screens/settings/my-vehicle";
+import TransactionHistory from "../features/screens/transaction-history";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -48,6 +49,7 @@ export default function RootNavigator() {
       <Stack.Screen name="Verification" component={Verification} />
       <Stack.Screen name="Stations" component={Stations} />
       <Stack.Screen name="VehicleSettings" component={VehicleSettings} />
+      <Stack.Screen name="TransactionHistory" component={TransactionHistory} />
     </Stack.Navigator>
   );
 }
