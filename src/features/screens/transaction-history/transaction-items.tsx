@@ -14,6 +14,7 @@ type TransactionType = {
   date: string;
   type: "credit" | "debit";
   qty: string;
+  RetailStation: string;
 };
 
 type Props = {
@@ -81,19 +82,21 @@ export default function TransactionsList({
   const transactions: TransactionType[] = [
     {
       ref: "FN-5678905",
-      amount: "₦25,900",
+      amount: "₦680/L",
       status: "Successful",
       date: "9:13 PM, 19 Feb. 2026",
       type: "credit",
       qty: "20 litres",
+      RetailStation: "Northwest, Ikeja",
     },
     {
       ref: "FN-9876543",
-      amount: "₦10,000",
+      amount: "₦680/L",
       status: "Unsuccessful",
       date: "10:45 AM, 20 Feb. 2026",
       type: "debit",
       qty: "25 litres",
+      RetailStation: "Northwest, Ikeja",
     },
   ];
 

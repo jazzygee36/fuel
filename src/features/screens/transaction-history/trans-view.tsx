@@ -26,25 +26,30 @@ export default function TransactionView({ setStep, selectionHis }: TransProps) {
       </View>
       <View style={{ marginVertical: 30, gap: 20 }}>
         <View style={styles.selectionDetails}>
-          <Text>Amount per litre</Text> <Text>{selectionHis?.amount}</Text>
+          <Text style={styles.textDesc}>Amount per litre</Text>{" "}
+          <Text style={styles.textItems}>{selectionHis?.amount}</Text>
         </View>
         <View style={styles.selectionDetails}>
-          <Text>Quantity</Text> <Text>{selectionHis?.qty}</Text>
+          <Text style={styles.textDesc}>Quantity</Text>{" "}
+          <Text style={styles.textItems}>{selectionHis?.qty}</Text>
         </View>
         <View style={styles.selectionDetails}>
-          <Text> Transaction date</Text> <Text>{selectionHis?.date}</Text>
+          <Text style={styles.textDesc}> Transaction date</Text>{" "}
+          <Text style={styles.textItems}>{selectionHis?.date}</Text>
         </View>
         <View style={styles.selectionDetails}>
-          <Text> Retail Station</Text> <Text>{selectionHis?.date}</Text>
+          <Text style={styles.textDesc}> Retail Station</Text>{" "}
+          <Text style={styles.textItems}>{selectionHis?.RetailStation}</Text>
         </View>
         <View style={styles.selectionDetails}>
-          <Text> Payment method</Text> <Text>{selectionHis?.type}</Text>
+          <Text style={styles.textDesc}> Payment method</Text>{" "}
+          <Text style={styles.textItems}>{selectionHis?.type}</Text>
         </View>
         <View style={styles.selectionDetails}>
-          <Text>Transaction status</Text> <Text>{selectionHis?.status}</Text>
+          <Text style={styles.textDesc}>Transaction status</Text>{" "}
+          <Text style={styles.textItems}>{selectionHis?.status}</Text>
         </View>
       </View>
-     
     </View>
   );
 }
@@ -82,5 +87,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
- 
+  textDesc: {
+    fontSize: 12,
+    color: "#76777A",
+  },
+  textItems: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#000000",
+  },
 });
