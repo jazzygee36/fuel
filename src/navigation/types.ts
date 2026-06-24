@@ -24,5 +24,6 @@ export type RootStackParamList = {
   Verification: undefined;
   Stations: undefined;
   TransactionHistory:undefined;
+  AddVehicle:undefined;
   HelpSupport: undefined;
 };

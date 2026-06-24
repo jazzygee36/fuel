@@ -6,12 +6,14 @@ import {
   Pressable,
   Text,
 } from "react-native";
-import BackArrow from "../../../components/back-arrow";
 import { Ionicons } from "@expo/vector-icons";
-import TextInputField from "../../../components/textInputField";
 import AppButton from "../../../components/button";
 import { useState } from "react";
 import SettingsHeader from "./header";
+import { RootStackParamList } from "../../../navigation/types";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useNavigation } from "@react-navigation/native";
+import ReuseableBottomModal from "../../../components/reuseable-bottom-modal";
 const VehicleDetails = [
   {
     carTitle: "Toyota Nissan Ultra",
@@ -21,9 +23,13 @@ const VehicleDetails = [
     tankCapacity: "45 litres",
   },
 ];
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function VehicleSettings() {
+  const navigation = useNavigation<NavigationProp>();
+
   const [openMenuIndex, setOpenMenuIndex] = useState<number | null>(null);
+  const [vehicleSuccessModal, setVehicleSuccessModal] = useState(false);
 
   const handleEdit = (index: number) => {
     console.log("Edit vehicle", index);
@@ -129,9 +135,22 @@ export default function VehicleSettings() {
           variant="filled"
           backgroundColor="#540863"
           // style={styles.btnHalf}
-          onPress={() => {}}
+          onPress={() => setVehicleSuccessModal(true)}
         />
       </ScrollView>
+      <ReuseableBottomModal
+        visible={vehicleSuccessModal}
+        title={"Your vehicle has been added"}
+        onClose={() => setVehicleSuccessModal(false)}
+        description="We’ve been able to successfully add a new vehicle"
+      >
+        <AppButton
+          title="Continue"
+          variant="filled"
+          backgroundColor="#540863"
+          // style={styles.btnHalf}
+        />
+      </ReuseableBottomModal>
     </View>
   );
 }

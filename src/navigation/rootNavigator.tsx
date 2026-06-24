@@ -16,6 +16,7 @@ import Verification from "../features/screens/verification";
 import Stations from "../features/screens/stations";
 import VehicleSettings from "../features/screens/settings/my-vehicle";
 import TransactionHistory from "../features/screens/transaction-history";
+import AddVehicle from "../features/screens/add-vehicle.tsx";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -50,6 +51,8 @@ export default function RootNavigator() {
       <Stack.Screen name="Stations" component={Stations} />
       <Stack.Screen name="VehicleSettings" component={VehicleSettings} />
       <Stack.Screen name="TransactionHistory" component={TransactionHistory} />
+      <Stack.Screen name="AddVehicle" component={AddVehicle} />
+      
     </Stack.Navigator>
   );
 }

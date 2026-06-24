@@ -7,10 +7,8 @@ import {
   TouchableOpacity,
   Pressable,
 } from "react-native";
-import TextInputField from "../../../components/textInputField";
-import { SetStateAction, useState } from "react";
+import {  useState } from "react";
 import ReuseableBottomModal from "../../../components/reuseable-bottom-modal";
-import AppButton from "../../../components/button";
 import FundWallet from "../wallet/fund-wallet";
 import SearchBar from "../../../components/search-bar";
 import ContinueModal from "./continue-modal";
@@ -19,6 +17,7 @@ import VerificationModal from "./verification-modal";
 import { useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "../../../navigation/types";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { Entypo } from "@expo/vector-icons";
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function Dashboard() {
@@ -63,8 +62,13 @@ export default function Dashboard() {
           />
           {/* </View> */}
           <View>
-            <Text style={styles.userName}>Hello, Smart!</Text>
-            <Text style={styles.desc}>Victoria Island, Lagos</Text>
+            <Text style={styles.userName}>
+              Hello, <span style={{ color: "#151521" }}> Smart!</span>
+            </Text>
+            <Text style={styles.desc}>
+              <Entypo name="location-pin" size={24} color="black" />
+              Victoria Island, Lagos
+            </Text>
           </View>
         </View>
 
@@ -217,7 +221,7 @@ const styles = StyleSheet.create({
   },
 
   userName: {
-    color: "#151521",
+    color: "#76777A",
     fontSize: 16,
     fontWeight: "700",
   },
@@ -225,7 +229,8 @@ const styles = StyleSheet.create({
   desc: {
     color: "#76777A",
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: "500",
+    fontFamily: "BricolageGrotesque",
   },
 
   balanceCard: {

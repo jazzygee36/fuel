@@ -33,9 +33,8 @@ const styles = StyleSheet.create({
   balanceCard: {
     width: "100%",
     backgroundColor: "#1A1C1E",
-    paddingVertical: 16,
-    paddingHorizontal: 18,
-  
+    paddingVertical: 22,
+    paddingHorizontal: 18, 
     borderRadius: 9,
     flexDirection: "row",
     justifyContent: "space-between",
