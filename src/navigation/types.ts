@@ -1,3 +1,16 @@
+export type Station = {
+  id: number;
+  name: string;
+  distance: string;
+  status: string;
+  logo: any;
+  favorite?: boolean;
+  func?: string;
+  petrol?:string;
+  Diesel?:string
+  Gas?:string
+
+};
 export type RootStackParamList = {
   home: undefined;
   login: undefined;
@@ -23,7 +36,8 @@ export type RootStackParamList = {
   FavouriteSettings: undefined;
   Verification: undefined;
   Stations: undefined;
-  TransactionHistory:undefined;
-  AddVehicle:undefined;
+  TransactionHistory: undefined;
+  AddVehicle: undefined;
   HelpSupport: undefined;
+  BuyFuel: { selectedStation: Station };
 };

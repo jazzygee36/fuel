@@ -1,6 +1,12 @@
 import React from "react";
-import { View, StyleSheet, Image, TouchableOpacity } from "react-native";
-import TextInputField from "./textInputField";
+import {
+  View,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  TextInput,
+  Platform,
+} from "react-native";
 
 interface Props {
   searchIcon?: boolean;
@@ -16,10 +22,15 @@ export default function SearchBar({
   return (
     <View style={[styles.flexDiv, styles.searchRow]}>
       <View style={styles.searchInputWrap}>
-        <TextInputField
+        <TextInput
           placeholder={placeholder}
-          height={50}
-          borderWidth={0}
+          placeholderTextColor="#999"
+          style={[
+            styles.input,
+            Platform.OS === "web"
+              ? ({ outlineStyle: "none", outlineWidth: 0 } as any)
+              : null,
+          ]}
         />
       </View>
 
@@ -27,7 +38,8 @@ export default function SearchBar({
         <TouchableOpacity style={styles.searchIconCircle} onPress={onPress}>
           <Image
             source={require("../assets/png/settingIcon.png")}
-            resizeMode="cover"
+            resizeMode="contain"
+            style={styles.icon}
           />
         </TouchableOpacity>
       )}
@@ -44,8 +56,6 @@ const styles = StyleSheet.create({
 
   searchRow: {
     marginVertical: 0,
-    flexDirection: "row",
-    alignItems: "center",
     gap: 8,
   },
 
@@ -54,6 +64,20 @@ const styles = StyleSheet.create({
     height: 50,
     backgroundColor: "#F0F0F4",
     borderRadius: 50,
+    justifyContent: "center",
+    paddingHorizontal: 16,
+    borderWidth: 0,
+    borderColor: "transparent",
+  },
+
+  input: {
+    flex: 1,
+    fontSize: 14,
+    color: "#000",
+    paddingVertical: 0,
+    borderWidth: 0,
+    borderColor: "transparent",
+    backgroundColor: "transparent",
   },
 
   searchIconCircle: {
@@ -63,5 +87,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 25,
     backgroundColor: "#F0F0F4",
+  },
+
+  icon: {
+    width: 20,
+    height: 20,
   },
 });

@@ -66,7 +66,7 @@ export default function Dashboard() {
               Hello, <span style={{ color: "#151521" }}> Smart!</span>
             </Text>
             <Text style={styles.desc}>
-              <Entypo name="location-pin" size={24} color="black" />
+              <Entypo name="location-pin" size={12} color="black" />
               Victoria Island, Lagos
             </Text>
           </View>

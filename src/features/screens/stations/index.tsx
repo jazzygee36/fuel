@@ -8,24 +8,16 @@ import {
   FlatList,
   ListRenderItem,
 } from "react-native";
-
 import SearchBar from "../../../components/search-bar";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { MaterialIcons } from "@expo/vector-icons";
 import SettingsHeader from "../settings/header";
 import ReuseableBottomModal from "../../../components/reuseable-bottom-modal";
 import FileterModal from "../dashboard/filter-moda";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList, Station } from "../../../navigation/types";
+import { useNavigation } from "@react-navigation/native";
 
 const fuelTabs = ["Petrol", "Diesel", "Gas", "CNG", "Engine Oil"];
-
-type Station = {
-  id: number;
-  name: string;
-  distance: string;
-  status: string;
-  logo: any;
-  favorite?: boolean;
-  func?: string;
-};
 
 const stations: Station[] = [
   {
@@ -36,6 +28,9 @@ const stations: Station[] = [
     logo: require("../../../assets/png/mrsIcon.png"),
     favorite: true,
     func: "Open",
+    petrol: "₦680/Litre",
+    Diesel: "₦990/Litre",
+    Gas: "₦680/Litre",
   },
   {
     id: 2,
@@ -45,6 +40,9 @@ const stations: Station[] = [
     logo: require("../../../assets/png/mrsIcon.png"),
     favorite: true,
     func: "Closed",
+    petrol: "₦680/Litre",
+    Diesel: "₦990/Litre",
+    Gas: "₦680/Litre",
   },
   {
     id: 3,
@@ -54,6 +52,9 @@ const stations: Station[] = [
     logo: require("../../../assets/png/mrsIcon.png"),
     favorite: true,
     func: "Open",
+    petrol: "₦680/Litre",
+    Diesel: "₦990/Litre",
+    Gas: "₦680/Litre",
   },
   {
     id: 4,
@@ -63,22 +64,23 @@ const stations: Station[] = [
     logo: require("../../../assets/png/mrsIcon.png"),
     favorite: false,
     func: "Closed",
+    petrol: "₦680/Litre",
+    Diesel: "₦990/Litre",
+    Gas: "₦680/Litre",
   },
 ];
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList, "Stations">;
 
 export default function Stations() {
   const [activeTab, setActiveTab] = useState("Petrol");
   const [stationList, setStationList] = useState<Station[]>(stations);
   const [openFilterModal, setOpenFilterModal] = useState(false);
-  const [selectedStation, setSelectedStation] = useState<Station | null>(null);
-  console.log("selectedStation", selectedStation);
 
-  const toggleFavorite = (id: number) => {
-    setStationList((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, favorite: !item.favorite } : item,
-      ),
-    );
+  const navigation = useNavigation<NavigationProp>();
+
+  const handleBuyFuel = (item: Station) => {
+    navigation.navigate("BuyFuel", { selectedStation: item });
   };
 
   const renderStation: ListRenderItem<Station> = ({ item }) => {
@@ -87,9 +89,8 @@ export default function Stations() {
     return (
       <TouchableOpacity
         style={styles.stationRow}
-        onPress={() => setSelectedStation(item)}
+        onPress={() => handleBuyFuel(item)}
       >
-        {/* LEFT */}
         <View style={styles.leftSection}>
           <Image source={item.logo} style={styles.logo} />
 
@@ -105,7 +106,6 @@ export default function Stations() {
           </View>
         </View>
 
-        {/* RIGHT */}
         <View>
           <View
             style={[
@@ -139,9 +139,7 @@ export default function Stations() {
       <SettingsHeader title="List of Fuel Stations" />
       <SearchBar
         placeholder="Search name/location"
-        onPress={() => {
-          setOpenFilterModal(true);
-        }}
+        onPress={() => setOpenFilterModal(true)}
       />
 
       <FlatList
@@ -168,6 +166,7 @@ export default function Stations() {
           );
         }}
       />
+
       <ReuseableBottomModal
         visible={openFilterModal}
         title="Filter"
@@ -197,81 +196,67 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
-
   container: {
     padding: 20,
     paddingBottom: 30,
   },
-
   tabsContainer: {
     alignItems: "center",
     marginTop: 22,
     marginBottom: 10,
   },
-
   tabItemWrapper: {
     flexDirection: "row",
     alignItems: "center",
   },
-
   tabText: {
     fontSize: 17,
     fontWeight: "600",
     color: "#8E8E93",
   },
-
   activeTabText: {
     color: "#7C3AED",
     fontWeight: "700",
   },
-
   dot: {
     marginHorizontal: 8,
     color: "#8E8E93",
     fontSize: 18,
   },
-
   stationRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     paddingVertical: 18,
   },
-
   leftSection: {
     flexDirection: "row",
     alignItems: "center",
     flex: 1,
   },
-
   logo: {
     width: 32,
     height: 32,
     resizeMode: "contain",
     marginRight: 14,
   },
-
   stationInfo: {
     flex: 1,
   },
-
   stationName: {
     fontSize: 18,
     fontWeight: "500",
     color: "#111",
     marginBottom: 4,
   },
-
   metaRow: {
     flexDirection: "row",
     alignItems: "center",
   },
-
   metaText: {
     fontSize: 15,
     color: "#8E8E93",
   },
-
   metaDot: {
     marginHorizontal: 5,
     color: "#8E8E93",
@@ -284,24 +269,19 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-
   officeHour: {
     fontSize: 13,
     fontWeight: "500",
   },
-
   openBadge: {
     backgroundColor: "#C0FEB8",
   },
-
   closedBadge: {
     backgroundColor: "#E2E2E5",
   },
-
   openText: {
     color: "#29A329",
   },
-
   closedText: {
     color: "#76777A",
   },
