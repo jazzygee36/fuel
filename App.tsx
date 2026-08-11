@@ -1,6 +1,11 @@
 import { NavigationContainer } from "@react-navigation/native";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
+
+import { AuthProvider } from "./src/providers/AuthProvider";
 import RootNavigator from "./src/navigation/rootNavigator";
+
+const queryClient = new QueryClient();
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -13,8 +18,12 @@ export default function App() {
   }
 
   return (
-    <NavigationContainer>
-      <RootNavigator  />
-    </NavigationContainer>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <NavigationContainer>
+          <RootNavigator />
+        </NavigationContainer>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }

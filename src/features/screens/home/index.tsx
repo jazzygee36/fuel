@@ -120,7 +120,7 @@ export default function Home() {
       />
 
       <Text style={{ textAlign: "center", marginTop: 17.5 }}>
-        Already have an account?{" "}
+        Already have an account?
         <Text
           style={styles.loginText}
           onPress={() => navigation.navigate("login")}
