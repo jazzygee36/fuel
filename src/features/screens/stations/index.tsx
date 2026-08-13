@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   FlatList,
   ListRenderItem,
+  ActivityIndicator,
 } from "react-native";
 import SearchBar from "../../../components/search-bar";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -16,6 +17,7 @@ import FileterModal from "../dashboard/filter-moda";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList, Station } from "../../../navigation/types";
 import { useNavigation } from "@react-navigation/native";
+import { useStation } from "../../../hooks/queries/stations";
 
 const fuelTabs = ["Petrol", "Diesel", "Gas", "CNG", "Engine Oil"];
 
@@ -73,6 +75,8 @@ const stations: Station[] = [
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, "Stations">;
 
 export default function Stations() {
+  const { data: nearbyStations, isPending } = useStation();
+  console.log('nearbyStations', nearbyStations)
   const [activeTab, setActiveTab] = useState("Petrol");
   const [stationList, setStationList] = useState<Station[]>(stations);
   const [openFilterModal, setOpenFilterModal] = useState(false);
@@ -85,6 +89,10 @@ export default function Stations() {
 
   const renderStation: ListRenderItem<Station> = ({ item }) => {
     const isOpen = item.func === "Open";
+
+    if (isPending) {
+      <ActivityIndicator size="large" color="#909194" />;
+    }
 
     return (
       <TouchableOpacity

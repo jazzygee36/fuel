@@ -3,8 +3,7 @@ import {
   Text,
   StyleSheet,
   View,
-  Image,
-  TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import TextInputField from "../../../components/textInputField";
 import AppButton from "../../../components/button";
@@ -12,13 +11,45 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../../navigation/types";
 import BackArrow from "../../../components/back-arrow";
-
-// import { Image } from "react-native-svg";
+import { useLogin } from "../../../hooks/mutations/useLogin";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { LoginForm, loginSchema } from "../../../utils/validation";
+import { LoginDto } from "../../../utils/types";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function Login() {
+  const { mutate, isPending } = useLogin();
   const navigation = useNavigation<NavigationProp>();
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginForm>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const onSubmit = (data: LoginDto) => {
+    const payload: LoginDto = {
+      email: data.email,
+      password: data.password,
+    };
+    mutate(payload, {
+      onSuccess: (response) => {
+        console.log("response", response);
+        if (response.access_token) {
+          navigation.navigate("dashboard");
+        }
+      },
+    });
+  };
+
   return (
     <View style={styles.page}>
       <ScrollView
@@ -29,12 +60,41 @@ export default function Login() {
 
         <View style={{ marginTop: 27, gap: 7 }}>
           <Text style={styles.title}>Welcome Back</Text>
+
           <Text style={styles.desc}>Input your details to get started</Text>
         </View>
 
         <View style={{ marginTop: 30, gap: 10 }}>
-          <TextInputField label="Email address" placeholder="Email address" />
-          <TextInputField label="Password" isPassword placeholder="Password" />
+          <Controller
+            control={control}
+            name="email"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInputField
+                label="Email address"
+                placeholder="Email address"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                error={errors.email?.message}
+              />
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="password"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInputField
+                label="Password"
+                isPassword
+                placeholder="Password"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                error={errors.password?.message}
+              />
+            )}
+          />
         </View>
 
         <Text
@@ -49,11 +109,18 @@ export default function Login() {
 
       <View style={styles.footer}>
         <AppButton
-          backgroundColor="#909194"
+          backgroundColor={"#540863"}
           textColor="#fff"
-          title="Login"
-          onPress={() => {navigation.replace('app')}}
+          title={
+            isPending ? (
+              <ActivityIndicator size="large" color="#909194" />
+            ) : (
+              "Login"
+            )
+          }
+          onPress={handleSubmit(onSubmit)}
         />
+
         <Text style={{ textAlign: "center", marginTop: 17.5 }}>
           Don't have an account?{" "}
           <Text
@@ -81,11 +148,13 @@ const styles = StyleSheet.create({
     color: "#776F69",
     fontWeight: "medium",
   },
+
   signUpText: {
     color: "#151B23",
     fontWeight: "bold",
     cursor: "pointer",
   },
+
   forgetPwd: {
     color: "#151B23",
     fontWeight: "bold",
@@ -94,6 +163,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     textDecorationLine: "underline",
   },
+
   page: {
     flex: 1,
     backgroundColor: "#fff",

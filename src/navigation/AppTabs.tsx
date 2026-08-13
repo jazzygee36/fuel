@@ -6,6 +6,7 @@ import Wallet from "../features/screens/wallet";
 import Settings from "../features/screens/settings";
 import SettingsStack from "./settings-stack";
 import Stations from "../features/screens/stations";
+import AddVehicle from "../features/screens/add-vehicle.tsx";
 
 const Tab = createBottomTabNavigator();
 
@@ -58,6 +59,7 @@ export default function AppTabs() {
       <Tab.Screen name="Wallet" component={Wallet} />
       <Tab.Screen name="Insure" component={Dashboard} />
       <Tab.Screen name="Settings" component={SettingsStack} />
+      <Tab.Screen name="AddVehicle" component={AddVehicle} />
       
     </Tab.Navigator>
   );

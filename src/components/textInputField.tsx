@@ -6,7 +6,6 @@ import {
   StyleSheet,
   TextInputProps,
   TouchableOpacity,
-  ViewStyle,
   StyleProp,
   TextStyle,
 } from "react-native";
@@ -18,7 +17,8 @@ interface Props extends TextInputProps {
   inputStyle?: StyleProp<TextStyle>;
   placeholder?: string;
   height?: number;
-  borderWidth?: number
+  borderWidth?: number;
+  error?: string;
 }
 
 export default function TextInputField({
@@ -27,7 +27,8 @@ export default function TextInputField({
   inputStyle,
   placeholder,
   height = 60,
-  borderWidth=1,
+  borderWidth = 1,
+  error,
   ...props
 }: Props) {
   const [hidePassword, setHidePassword] = useState(true);
@@ -36,7 +37,13 @@ export default function TextInputField({
     <View style={styles.container}>
       {label ? <Text style={styles.label}>{label}</Text> : null}
 
-      <View style={[styles.inputWrapper, { height, borderWidth }]}>
+      <View
+        style={[
+          styles.inputWrapper,
+          { height, borderWidth },
+          error && styles.inputError,
+        ]}
+      >
         <TextInput
           style={[styles.input, inputStyle]}
           secureTextEntry={isPassword ? hidePassword : false}
@@ -58,6 +65,8 @@ export default function TextInputField({
           </TouchableOpacity>
         )}
       </View>
+
+      {error && <Text style={styles.errorText}>{error}</Text>}
     </View>
   );
 }
@@ -66,30 +75,41 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: 16,
   },
+
   label: {
     fontSize: 14,
     fontWeight: "500",
     marginBottom: 6,
     color: "#333",
   },
+
   inputWrapper: {
     flexDirection: "row",
     alignItems: "center",
-    // borderWidth: 1,
     borderColor: "#D0D5DD",
     borderRadius: 10,
     paddingHorizontal: 12,
     backgroundColor: "transparent",
-    // outlineColor: "none",
   },
+
+  inputError: {
+    borderColor: "#EF4444",
+  },
+
   input: {
     flex: 1,
     fontSize: 15,
     color: "#000",
     outlineColor: "transparent",
-    
   },
+
   icon: {
     paddingLeft: 10,
+  },
+
+  errorText: {
+    color: "#EF4444",
+    fontSize: 12,
+    marginTop: 5,
   },
 });

@@ -1,46 +1,63 @@
 import * as SecureStore from "expo-secure-store";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Platform } from "react-native";
 
 const ACCESS_TOKEN_KEY = "access_token";
 const REFRESH_TOKEN_KEY = "refresh_token";
 
+const storage = {
+  async getItem(key: string) {
+    if (Platform.OS === "web") {
+      return AsyncStorage.getItem(key);
+    }
+
+    return SecureStore.getItemAsync(key);
+  },
+
+  async setItem(key: string, value: string) {
+    if (Platform.OS === "web") {
+      return AsyncStorage.setItem(key, value);
+    }
+
+    return SecureStore.setItemAsync(key, value);
+  },
+
+  async removeItem(key: string) {
+    if (Platform.OS === "web") {
+      return AsyncStorage.removeItem(key);
+    }
+
+    return SecureStore.deleteItemAsync(key);
+  },
+};
+
 export const token = {
-
-  
-  // Save access token
-  async setAccessToken(accessToken: string) {
-    await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, accessToken);
-  },
-
-  // Get access token
   async getAccessToken() {
-    return await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
+    return storage.getItem(ACCESS_TOKEN_KEY);
   },
 
-  // Remove access token
+  async setAccessToken(accessToken: string) {
+    return storage.setItem(ACCESS_TOKEN_KEY, accessToken);
+  },
+
   async removeAccessToken() {
-    await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
+    return storage.removeItem(ACCESS_TOKEN_KEY);
   },
 
-  // Save refresh token
-  async setRefreshToken(refreshToken: string) {
-    await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refreshToken);
-  },
-
-  // Get refresh token
   async getRefreshToken() {
-    return await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
+    return storage.getItem(REFRESH_TOKEN_KEY);
   },
 
-  // Remove refresh token
+  async setRefreshToken(refreshToken: string) {
+    return storage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+  },
+
   async removeRefreshToken() {
-    await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
+    return storage.removeItem(REFRESH_TOKEN_KEY);
   },
 
-  // Clear everything
-  async clear() {
-    await Promise.all([
-      SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY),
-      SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY),
-    ]);
+  async clearTokens() {
+    await storage.removeItem(ACCESS_TOKEN_KEY);
+    await storage.removeItem(REFRESH_TOKEN_KEY);
   },
 };

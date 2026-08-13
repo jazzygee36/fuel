@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   Pressable,
 } from "react-native";
-import {  useState } from "react";
+import { useState } from "react";
 import ReuseableBottomModal from "../../../components/reuseable-bottom-modal";
 import FundWallet from "../wallet/fund-wallet";
 import SearchBar from "../../../components/search-bar";
@@ -18,9 +18,12 @@ import { useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "../../../navigation/types";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Entypo } from "@expo/vector-icons";
+import { useCurrentUser } from "../../../hooks/queries/useCurrentUser";
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function Dashboard() {
+  const { data: Users } = useCurrentUser();
+  console.log("Users", Users);
   const navigation = useNavigation<NavigationProp>();
 
   const [open, setOpen] = useState(false);
@@ -54,16 +57,27 @@ export default function Dashboard() {
     >
       <View style={styles.flexDiv}>
         <View style={styles.flexCircle}>
-          {/* <View style={styles.circle}> */}
-          <Image
-            source={require("../../../assets/png/avatar.png")}
-            // style={styles.stationImage}
-            resizeMode="cover"
-          />
-          {/* </View> */}
+          <View style={styles.avataContainer}>
+            {Users?.profileImage ? (
+              <Image
+                source={{ uri: Users.profileImage }}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                }}
+              />
+            ) : (
+              <Text style={styles.avarta}>
+                {Users?.firstName?.charAt(0) || "U"}
+              </Text>
+            )}
+          </View>
           <View>
             <Text style={styles.userName}>
-              Hello, <span style={{ color: "#151521" }}> Smart!</span>
+              Hello,
+              <Text style={{ color: "#151521", fontWeight: "700" }}>
+                {Users?.firstName}
+              </Text>
             </Text>
             <Text style={styles.desc}>
               <Entypo name="location-pin" size={12} color="black" />
@@ -331,5 +345,30 @@ const styles = StyleSheet.create({
     textAlign: "right",
     justifyContent: "flex-end",
     cursor: "pointer",
+  },
+  avataContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: "#665096",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#E1D8F5",
+    overflow: "hidden",
+    elevation: 3, // Android shadow
+    shadowColor: "#000", // iOS shadow
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+  },
+  avarta: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "700",
+    textTransform: "uppercase",
   },
 });

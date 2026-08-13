@@ -17,18 +17,13 @@ import BuyFuel from "../features/screens/buy-fuel";
 import TransactionHistory from "../features/screens/transaction-history";
 import VehicleSettings from "../features/screens/settings/my-vehicle";
 import Verification from "../features/screens/verification";
+import AddVehicle from "../features/screens/add-vehicle.tsx";
 // import AddVehicle from "../features/screens/add-vehicle";
 
 const Stack = createNativeStackNavigator();
 
 export default function RootNavigator() {
   const { isAuthenticated, isLoading } = useAuth();
-
-  console.log({
-    "isAuthenticated": isAuthenticated,
-    isLoading,
-    
-  });
 
   if (isLoading) {
     return (
@@ -67,6 +62,7 @@ export default function RootNavigator() {
             component={TransactionHistory}
           />
           <Stack.Screen name="VehicleSettings" component={VehicleSettings} />
+          <Stack.Screen name="AddVehicle" component={AddVehicle} />
           {/* <Stack.Screen name="AddVehicle" component={AddVehicle} /> */}
           <Stack.Screen name="BuyFuel" component={BuyFuel} />
         </>

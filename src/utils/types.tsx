@@ -1,6 +1,7 @@
+import { ReactNode } from "react";
 import { ViewStyle, TextStyle } from "react-native";
 export type ButtonProps = {
-  title: string;
+  title: ReactNode;
   onPress?: () => void;
   backgroundColor?: string;
   textColor?: string;
@@ -9,3 +10,19 @@ export type ButtonProps = {
   disabled?: boolean;
   variant?: "filled" | "outlined";
 };
+
+export interface LoginDto {
+  email: string;
+  password: string;
+}
+
+export interface VehicleDto {
+  registrationNumber: string;
+  make: string;
+  model: string;
+  year: string;
+  color: string;
+  vin: string;
+  fuelType: string;
+  capacity: string;
+}

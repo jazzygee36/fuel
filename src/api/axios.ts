@@ -3,7 +3,7 @@ import { token } from "../storage/token";
 import Constants from "expo-constants";
 
 const api = axios.create({
-  baseURL: Constants.expoConfig?.extra?.apiUrl,
+  baseURL: 'https://backend-production-4df9.up.railway.app',
 });
 
 api.interceptors.request.use(async (config) => {

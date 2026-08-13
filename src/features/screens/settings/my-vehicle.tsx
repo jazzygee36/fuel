@@ -5,6 +5,7 @@ import {
   Image,
   Pressable,
   Text,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import AppButton from "../../../components/button";
@@ -14,18 +15,16 @@ import { RootStackParamList } from "../../../navigation/types";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useNavigation } from "@react-navigation/native";
 import ReuseableBottomModal from "../../../components/reuseable-bottom-modal";
-const VehicleDetails = [
-  {
-    carTitle: "Toyota Nissan Ultra",
-    petrolType: "Fuel",
-    carType: "SUV",
-    plateNumber: "*** 123XY",
-    tankCapacity: "45 litres",
-  },
-];
+import { useVehicles } from "../../../hooks/queries/vehicles";
+import { useCurrentUserId } from "../../../hooks/queries/useCurrentUser";
+import AddVehicle from "../add-vehicle.tsx";
+
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function VehicleSettings() {
+  const { data: userId } = useCurrentUserId();
+  const { data: vehicles, isPending } = useVehicles(userId?.id);
+  console.log("vehicles", vehicles);
   const navigation = useNavigation<NavigationProp>();
 
   const [openMenuIndex, setOpenMenuIndex] = useState<number | null>(null);
@@ -40,6 +39,13 @@ export default function VehicleSettings() {
     console.log("Delete vehicle", index);
     setOpenMenuIndex(null);
   };
+  if (isPending) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#909194" />
+      </View>
+    );
+  }
   return (
     <View style={styles.screen}>
       <ScrollView
@@ -49,9 +55,7 @@ export default function VehicleSettings() {
         <SettingsHeader title={"My Vehicles"} />
 
         <View style={styles.vehicleContainer}>
-          {Array.from({ length: 4 }).map((_, index) => {
-            const vehicle = VehicleDetails[0];
-
+          {vehicles?.map((vehicle: any, index: number) => {
             return (
               <View key={index} style={styles.vehicleDetails}>
                 <View style={styles.topVehicle}>
@@ -63,9 +67,14 @@ export default function VehicleSettings() {
                       />
                     </View>
                     <View>
-                      <Text style={styles.titleText}>{vehicle.carTitle}</Text>
-                      <Text style={{ color: "#595959" }}>
-                        {vehicle.petrolType}
+                      <Text style={styles.titleText}>{vehicle?.make}</Text>
+                      <Text
+                        style={{
+                          color: "#595959",
+                          textTransform: "capitalize",
+                        }}
+                      >
+                        {vehicle?.fuelType}
                       </Text>
                     </View>
                   </View>
@@ -114,17 +123,19 @@ export default function VehicleSettings() {
 
                 <View style={styles.vehicleType}>
                   <Text style={styles.carText}>Car Type</Text>
-                  <Text style={styles.carName}>{vehicle.carType}</Text>
+                  <Text style={styles.carName}>{vehicle?.model}</Text>
                 </View>
 
                 <View style={styles.vehicleType}>
                   <Text style={styles.carText}>Plate Number</Text>
-                  <Text style={styles.carName}>{vehicle.plateNumber}</Text>
+                  <Text style={styles.carName}>
+                    {vehicle?.registrationNumber}
+                  </Text>
                 </View>
 
                 <View style={styles.vehicleType}>
                   <Text style={styles.carText}>Tank Capacity</Text>
-                  <Text style={styles.carName}>{vehicle.tankCapacity}</Text>
+                  <Text style={styles.carName}>{vehicle?.capacity} litres</Text>
                 </View>
               </View>
             );
@@ -135,22 +146,23 @@ export default function VehicleSettings() {
           variant="filled"
           backgroundColor="#540863"
           // style={styles.btnHalf}
-          onPress={() => setVehicleSuccessModal(true)}
+          onPress={() => navigation.navigate('AddVehicle')}
         />
       </ScrollView>
-      <ReuseableBottomModal
+      {/* <ReuseableBottomModal
         visible={vehicleSuccessModal}
         title={"Your vehicle has been added"}
         onClose={() => setVehicleSuccessModal(false)}
         description="We’ve been able to successfully add a new vehicle"
-      >
-        <AppButton
+      > */}
+        {/* <AddVehicle /> */}
+        {/* <AppButton
           title="Continue"
           variant="filled"
           backgroundColor="#540863"
           // style={styles.btnHalf}
-        />
-      </ReuseableBottomModal>
+        /> */}
+      {/* </ReuseableBottomModal> */}
     </View>
   );
 }
@@ -255,5 +267,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "500",
     color: "#151521",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
   },
 });

@@ -37,19 +37,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     checkToken();
   }, []);
 
-  const {
-    data: user,
-    isLoading,
-    isError,
-  } = useCurrentUser({
-    enabled: hasToken,
-  });
+  const { data: user, isLoading, isError } = useCurrentUser();
 
-  console.log({
-    hasToken: hasToken,
-    checkingAuth,
-    queryLoading: isLoading,
-  });
   useEffect(() => {
     if (hasToken && isError) {
       logout();
@@ -57,7 +46,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [hasToken, isError]);
 
   const logout = async () => {
-    await token.clear();
+    await token.clearTokens();
 
     queryClient.removeQueries({
       queryKey: ["currentUser"],
@@ -67,22 +56,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    console.log("Effect fired");
-
     const checkToken = async () => {
-      console.log("Before getAccessToken");
-
       const accessToken = await token.getAccessToken();
-
-      console.log("After getAccessToken");
-
       setHasToken(!!accessToken);
-
-      console.log("Before setCheckingAuth");
-
       setCheckingAuth(false);
-
-      console.log("After setCheckingAuth");
     };
 
     checkToken();

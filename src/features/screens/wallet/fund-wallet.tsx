@@ -2,6 +2,7 @@ import { useNavigation } from "@react-navigation/native";
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import { RootStackParamList } from "../../../navigation/types";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useWallet } from "../../../hooks/queries/wallet";
 
 interface Props {
   setStep: React.Dispatch<React.SetStateAction<number>>;
@@ -11,12 +12,14 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function FundWallet({ setStep }: Props) {
   const navigation = useNavigation<NavigationProp>();
+  const { data: wallet } = useWallet();
+
 
   return (
     <View style={styles.balanceCard}>
       <View>
         <Text style={styles.balanceLabel}>Total Balance</Text>
-        <Text style={styles.balanceAmount}>₦25,000</Text>
+        <Text style={styles.balanceAmount}>₦{wallet?.balance}</Text>
       </View>
 
       <Pressable

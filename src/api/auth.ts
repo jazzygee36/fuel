@@ -33,6 +33,12 @@ export const getCurrentUser = async () => {
   return data;
 };
 
+export const getCurrentUserId = async () => {
+  const { data } = await api.get("/users/me");
+
+  return data;
+};
+
 export const logout = async () => {
   const { data } = await api.post("/auth/logout");
 
