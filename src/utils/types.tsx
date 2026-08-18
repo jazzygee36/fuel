@@ -20,9 +20,9 @@ export interface VehicleDto {
   registrationNumber: string;
   make: string;
   model: string;
-  year: string;
+  year: number;
   color: string;
   vin: string;
   fuelType: string;
-  capacity: string;
+  capacity: number;
 }

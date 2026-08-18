@@ -41,11 +41,8 @@ export default function Login() {
       password: data.password,
     };
     mutate(payload, {
-      onSuccess: (response) => {
-        console.log("response", response);
-        if (response.access_token) {
-          navigation.navigate("dashboard");
-        }
+      onSuccess: () => {
+        navigation.navigate("dashboard");
       },
     });
   };
@@ -122,7 +119,7 @@ export default function Login() {
         />
 
         <Text style={{ textAlign: "center", marginTop: 17.5 }}>
-          Don't have an account?{" "}
+          Don't have an account? 
           <Text
             style={styles.signUpText}
             onPress={() => navigation.navigate("register" as never)}

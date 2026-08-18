@@ -1,4 +1,10 @@
-import { View, Text, ScrollView, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
 import BackArrow from "../../../components/back-arrow";
 import TextInputField from "../../../components/textInputField";
 import AppButton from "../../../components/button";
@@ -6,8 +12,15 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { VehicleForm, vehicleSchema } from "../../../utils/validation";
 import { VehicleDto } from "../../../utils/types";
+import { useAddVehicles } from "../../../hooks/mutations/vehicles";
+import { useCurrentUserId } from "../../../hooks/queries/useCurrentUser";
+import SelectInput from "../../../components/select-input";
+
 
 export default function AddVehicle() {
+  const { data: userId } = useCurrentUserId();
+  const { mutate, isPending } = useAddVehicles(userId?.id);
+
   const {
     control,
     handleSubmit,
@@ -26,26 +39,32 @@ export default function AddVehicle() {
     },
   });
 
-  const onSubmit = (data: VehicleDto) => {
+  const onSubmit = (data: VehicleForm) => {
     const payload: VehicleDto = {
       registrationNumber: data.registrationNumber,
       make: data.make,
       model: data.model,
-      year: data.year,
+      year: Number(data.year),
       color: data.color,
       vin: data.vin,
       fuelType: data.fuelType,
-      capacity: data.capacity,
+      capacity: Number(data.capacity),
     };
-    // mutate(payload, {
-    //   onSuccess: (response) => {
-    //     console.log("response", response);
-    //     if (response.access_token) {
-    //       navigation.navigate("dashboard");
-    //     }
-    //   },
-    // });
+    mutate(payload, {
+      onSuccess: () => {
+        navigation.navigate("AddVehicle");
+      },
+    });
   };
+
+  const currentYear = new Date().getFullYear();
+
+  const YearList = Array.from({ length: currentYear - 1980 + 1 }, (_, index) =>
+    String(currentYear - index),
+  );
+
+  const FuelList = ["PETROL", "DIESEL"];
+
   return (
     <View style={styles.screen}>
       <ScrollView
@@ -110,13 +129,12 @@ export default function AddVehicle() {
           <Controller
             control={control}
             name="fuelType"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <TextInputField
+            render={({ field: { onChange, value } }) => (
+              <SelectInput
                 label="Fuel Type"
-                placeholder="Fuel type"
                 value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
+                options={FuelList}
+                onChange={onChange}
                 error={errors?.fuelType?.message}
               />
             )}
@@ -138,13 +156,13 @@ export default function AddVehicle() {
           <Controller
             control={control}
             name="year"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <TextInputField
+            render={({ field: { onChange, value } }) => (
+              <SelectInput
                 label="Year"
-                placeholder="Year"
+                placeholder="Select year"
                 value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
+                options={YearList}
+                onChange={onChange}
                 error={errors?.year?.message}
               />
             )}
@@ -152,7 +170,7 @@ export default function AddVehicle() {
 
           <Controller
             control={control}
-            name="year"
+            name="vin"
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInputField
                 label="Vin"
@@ -166,7 +184,7 @@ export default function AddVehicle() {
           />
           <Controller
             control={control}
-            name="year"
+            name="capacity"
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInputField
                 label="Capacity"
@@ -180,7 +198,13 @@ export default function AddVehicle() {
           />
         </View>
         <AppButton
-          title="Save vehicle"
+          title={
+            isPending ? (
+              <ActivityIndicator size="large" color="#909194" />
+            ) : (
+              "Save vehicle"
+            )
+          }
           variant="filled"
           backgroundColor="#540863"
           onPress={handleSubmit(onSubmit)}
@@ -218,5 +242,11 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     fontFamily: "BricolageGrotesque",
     color: "#151521",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
   },
 });
