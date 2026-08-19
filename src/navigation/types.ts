@@ -1,3 +1,7 @@
+import { CompositeNavigationProp } from "@react-navigation/native";
+import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+
 export type Station = {
   id: number;
   name: string;
@@ -6,15 +10,14 @@ export type Station = {
   logo: any;
   favorite?: boolean;
   func?: string;
-  petrol?:string;
-  Diesel?:string
-  Gas?:string
-
+  petrol?: string;
+  Diesel?: string;
+  Gas?: string;
 };
+
 export type RootStackParamList = {
   home: undefined;
   login: undefined;
-  dashboard: undefined;
   register: undefined;
   individual: undefined;
   policy: undefined;
@@ -22,22 +25,31 @@ export type RootStackParamList = {
   verify: undefined;
   forgot: undefined;
   newpassword: undefined;
-  app: undefined;
-  Wallet: undefined;
-  Settings: undefined;
-  AccountSettings: undefined;
-  VehicleSettings: undefined;
-  Favourites: undefined;
-  Referral: undefined;
-  SecuritySettings: undefined;
-  UpdateTransactionPin: undefined;
-  ChangePasswordPin: undefined;
-  ReferralSettings: undefined;
-  FavouriteSettings: undefined;
-  Verification: undefined;
   Stations: undefined;
+  app: undefined;
+  Support: undefined;
+  Verification: undefined;
   TransactionHistory: undefined;
+  VehicleSettings: undefined;
   AddVehicle: undefined;
-  HelpSupport: undefined;
-  BuyFuel: { selectedStation: Station };
+  Settings:undefined;
+  Wallet:undefined;
+
+  BuyFuel: {
+    selectedStation: Station;
+  };
 };
+
+export type AppTabParamList = {
+  Dashboard: undefined;
+  Stations: undefined;
+  Wallet: undefined;
+  Insure: undefined;
+  Settings: undefined;
+  // AddVehicle: undefined;
+};
+
+export type StationsNavigationProp = CompositeNavigationProp<
+  BottomTabNavigationProp<AppTabParamList, "Stations">,
+  NativeStackNavigationProp<RootStackParamList>
+>;

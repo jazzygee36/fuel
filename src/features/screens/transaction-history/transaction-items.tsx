@@ -5,12 +5,14 @@ import { Ionicons } from "@expo/vector-icons";
 interface TransProps {
   setStep: React.Dispatch<React.SetStateAction<number>>;
   setSelectionHis: React.Dispatch<React.SetStateAction<object>>;
+  transactionFilter: string;
+  data: TransactionType[];
 }
 
 type TransactionType = {
   ref: string;
   amount: string;
-  status: "Successful" | "Unsuccessful";
+  status: "Successful" | "Unsuccessful" | "Cancelled" | "Progress";
   date: string;
   type: "credit" | "debit";
   qty: string;
@@ -21,12 +23,12 @@ type Props = {
   data: TransactionType;
   onPress?: () => void;
 };
+
 function TransactionItem({ data, onPress }: Props) {
   const isSuccess = data.status === "Successful";
 
   return (
     <TouchableOpacity style={styles.container} onPress={onPress}>
-      {/* LEFT */}
       <View style={styles.left}>
         <View
           style={[
@@ -49,7 +51,6 @@ function TransactionItem({ data, onPress }: Props) {
         </View>
       </View>
 
-      {/* RIGHT */}
       <View style={styles.right}>
         <View
           style={[
@@ -78,36 +79,47 @@ function TransactionItem({ data, onPress }: Props) {
 export default function TransactionsList({
   setStep,
   setSelectionHis,
+  transactionFilter,
+  data,
 }: TransProps) {
-  const transactions: TransactionType[] = [
-    {
-      ref: "FN-5678905",
-      amount: "₦680/L",
-      status: "Successful",
-      date: "9:13 PM, 19 Feb. 2026",
-      type: "credit",
-      qty: "20 litres",
-      RetailStation: "Northwest, Ikeja",
-    },
-    {
-      ref: "FN-9876543",
-      amount: "₦680/L",
-      status: "Unsuccessful",
-      date: "10:45 AM, 20 Feb. 2026",
-      type: "debit",
-      qty: "25 litres",
-      RetailStation: "Northwest, Ikeja",
-    },
-  ];
+  const filteredTransactions =
+    transactionFilter === "All transactions"
+      ? data
+      : data.filter(
+          (item) =>
+            item?.status.toLowerCase() === transactionFilter.toLowerCase(),
+        );
+
+  if (filteredTransactions.length === 0) {
+    return (
+      <View style={styles.emptyContainer}>
+        <View style={styles.emptyIcon}>
+          <Ionicons name="receipt-outline" size={32} color="#540863" />
+        </View>
+
+        <Text style={styles.emptyTitle}>No transactions found</Text>
+
+        <Text style={styles.emptyText}>
+          You don't have any{" "}
+          {transactionFilter === "All transactions"
+            ? ""
+            : transactionFilter.toLowerCase() + " "}
+          transactions yet.
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <View>
-      {transactions.map((item, index) => (
+      {filteredTransactions.map((item) => (
         <TransactionItem
-          key={index}
+          key={item.ref}
           data={item}
           onPress={() => {
-            (console.log(item), (setStep(2), setSelectionHis(item)));
+            console.log(item);
+            setStep(2);
+            setSelectionHis(item);
           }}
         />
       ))}
@@ -197,5 +209,37 @@ const styles = StyleSheet.create({
   date: {
     fontSize: 11,
     color: "#6B7280",
+  },
+
+  emptyContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 30,
+    paddingVertical: 80,
+  },
+
+  emptyIcon: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: "#F4EAF7",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 18,
+  },
+
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#151521",
+    textAlign: "center",
+    marginBottom: 8,
+  },
+
+  emptyText: {
+    fontSize: 14,
+    lineHeight: 21,
+    color: "#8E8E93",
+    textAlign: "center",
   },
 });

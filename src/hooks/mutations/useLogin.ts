@@ -1,13 +1,15 @@
 import { useMutation } from "@tanstack/react-query";
-import { token } from "../../storage/token";
 import { login } from "../../api/auth";
+import { useAuth } from "../../providers/AuthProvider";
 
 export const useLogin = () => {
+  const { login: authenticate } = useAuth();
+
   return useMutation({
     mutationFn: login,
 
     onSuccess: async (data: Awaited<ReturnType<typeof login>>) => {
-      await token.setAccessToken(data.access_token);
+      await authenticate(data.access_token);
     },
   });
 };

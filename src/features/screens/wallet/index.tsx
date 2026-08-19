@@ -8,56 +8,70 @@ import AppButton from "../../../components/button";
 export default function Wallet() {
   const [step, setStep] = useState<number>(1);
 
-  const handleStep = () => {
-    setStep(1)
-  }
-
   return (
     <View style={styles.screen}>
       <ScrollView
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
       >
+        {/* Header */}
         <View style={styles.wallet}>
           <BackArrow />
+
           <Text style={styles.walletText}>
             {step === 1 ? "Wallet" : "Fund wallet"}
           </Text>
         </View>
 
+        {/* STEP 1 - WALLET */}
         {step === 1 && (
           <View>
-            <FundWallet setStep={setStep} />
+            <View style={{ marginTop: 25 }}>
+              <FundWallet route="Wallet" setStep={setStep} />
+            </View>
 
             <View style={styles.virtualAccount}>
               <View>
                 <Text style={styles.virtualLabel}>
-                  Fund wallet with your {"\n"}virtual account number
+                  Fund wallet with your{"\n"}
+                  virtual account number
                 </Text>
               </View>
 
               <View>
                 <Text style={styles.virtualLabel}>
-                  Paystack-Titan {"\n"}
-                  <Text style={{ fontWeight: "bold" }}>6294063927</Text>
+                  Paystack-Titan{"\n"}
+                  <Text
+                    style={{
+                      fontWeight: "bold",
+                      color: "#540863",
+                    }}
+                  >
+                    6294063927
+                  </Text>
                 </Text>
               </View>
             </View>
           </View>
         )}
 
+        {/* STEP 2 - FUND WALLET */}
         {step === 2 && (
           <View>
             <Text style={styles.amountText}>
               How much would you like to fund?
             </Text>
+
             <TextInputField placeholder="Enter amount" />
+
             <View style={styles.footer}>
               <AppButton
                 backgroundColor="#540863"
                 textColor="#fff"
                 title="Continue"
-                onPress={() => {}}
+                onPress={() => {
+                  // continue funding
+                }}
               />
             </View>
           </View>
@@ -83,7 +97,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 13,
-    marginBottom:30
+    marginBottom: 30,
   },
 
   walletText: {

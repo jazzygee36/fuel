@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   StyleSheet,
@@ -6,10 +6,8 @@ import {
   Text,
   TouchableOpacity,
   FlatList,
-  ListRenderItem,
   ActivityIndicator,
 } from "react-native";
-import * as Location from "expo-location";
 import SearchBar from "../../../components/search-bar";
 import { MaterialIcons } from "@expo/vector-icons";
 import SettingsHeader from "../settings/header";
@@ -18,87 +16,43 @@ import FileterModal from "../dashboard/filter-moda";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../../navigation/types";
 import { useNavigation } from "@react-navigation/native";
-import { useNearbyStations } from "../../../hooks/queries/stations";
+import { useAllStations } from "../../../hooks/queries/stations";
+import Loading from "../../../components/loading";
 
-const fuelTabs = ["Petrol", "Diesel", "Gas", "CNG", "Engine Oil"];
+const fuelTabs = ["Petrol", "Diesel", "Gas", "Kerosene"];
 
-type NavigationProp = NativeStackNavigationProp<
-  RootStackParamList,
-  "Stations"
->;
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function Stations() {
   const navigation = useNavigation<NavigationProp>();
+  const { data: stationsResponse, isPending } = useAllStations();
 
   const [activeTab, setActiveTab] = useState("Petrol");
   const [openFilterModal, setOpenFilterModal] = useState(false);
 
-  const [latitude, setLatitude] = useState<number>();
-  const [longitude, setLongitude] = useState<number>();
-  const [locationError, setLocationError] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
-  /**
-   * Get user's current location
-   */
-  useEffect(() => {
-    const getLocation = async () => {
-      try {
-        const { status } =
-          await Location.requestForegroundPermissionsAsync();
+  const stationsPerPage = 10;
 
-        if (status !== "granted") {
-          setLocationError("Location permission was denied");
-          return;
-        }
+  const stations = Array.isArray(stationsResponse)
+    ? stationsResponse
+    : (stationsResponse?.stations ?? []);
+  console.log("stations", stations);
+  const filteredStations = stations.filter((station: any) =>
+    station?.products?.some(
+      (product: any) =>
+        product?.type?.toLowerCase() === activeTab.toLowerCase(),
+    ),
+  );
 
-        const currentLocation =
-          await Location.getCurrentPositionAsync({
-            accuracy: Location.Accuracy.High,
-          });
+  const totalPages = Math.ceil(filteredStations.length / stationsPerPage);
 
-        const lat = currentLocation.coords.latitude;
-        const lng = currentLocation.coords.longitude;
+  const startIndex = (currentPage - 1) * stationsPerPage;
 
-        console.log("USER LATITUDE:", lat);
-        console.log("USER LONGITUDE:", lng);
-
-        setLatitude(lat);
-        setLongitude(lng);
-      } catch (error) {
-        console.log("Location error:", error);
-        setLocationError("Unable to get your current location");
-      }
-    };
-
-    getLocation();
-  }, []);
-
-  /**
-   * Get nearby stations
-   *
-   * This will NOT run until latitude and longitude exist
-   * because of the `enabled` condition in useNearbyStations.
-   */
-  const {
-    data: nearbyStations,
-    isPending,
-    isError,
-    error,
-  } = useNearbyStations(latitude, longitude);
-
-  console.log("NEARBY STATIONS:", nearbyStations);
-
-  /**
-   * Make sure the API response is an array.
-   *
-   * If your backend returns { data: [...] },
-   * change this to:
-   *
-   * const stationList = nearbyStations?.data ?? [];
-   */
-  const stationList = Array.isArray(nearbyStations)
-    ? nearbyStations
-    : [];
+  const paginatedStations = filteredStations.slice(
+    startIndex,
+    startIndex + stationsPerPage,
+  );
 
   const handleBuyFuel = (item: any) => {
     navigation.navigate("BuyFuel", {
@@ -106,13 +60,62 @@ export default function Stations() {
     });
   };
 
-  const renderStation: ListRenderItem<any> = ({ item }) => {
-    /**
-     * Adjust these field names based on your backend response.
-     */
-    const isOpen =
-      item.status?.toLowerCase() === "open" ||
-      item.func?.toLowerCase() === "open";
+  const formatOperatingHours = (hours?: string) => {
+    if (!hours) return "Available";
+
+    const [open, close] = hours.split(" - ");
+
+    const formatTime = (time: string) => {
+      const [hour, minute] = time.split(":").map(Number);
+
+      const period = hour >= 12 ? "PM" : "AM";
+      const formattedHour = hour % 12 || 12;
+
+      return `${formattedHour}:${minute.toString().padStart(2, "0")} ${period}`;
+    };
+
+    return `${formatTime(open)} - ${formatTime(close)}`;
+  };
+
+  const isCurrentlyOpen = (hours?: string) => {
+    if (!hours) return false;
+
+    const [open, close] = hours.split(" - ");
+
+    if (!open || !close) return false;
+
+    const now = new Date();
+
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+    const [openHour, openMinute] = open.split(":").map(Number);
+    const [closeHour, closeMinute] = close.split(":").map(Number);
+
+    const openingMinutes = openHour * 60 + openMinute;
+    const closingMinutes = closeHour * 60 + closeMinute;
+
+    // Normal opening hours e.g. 06:00 - 22:00
+    if (openingMinutes <= closingMinutes) {
+      return (
+        currentMinutes >= openingMinutes && currentMinutes <= closingMinutes
+      );
+    }
+
+    // Handles overnight hours e.g. 22:00 - 06:00
+    return currentMinutes >= openingMinutes || currentMinutes <= closingMinutes;
+  };
+
+  const renderStation = ({ item }: { item: any }) => {
+    console.log("item", item);
+    const isOpen = isCurrentlyOpen(item?.operatingHours);
+    const selectedProduct = item?.products?.find(
+      (product: any) =>
+        product?.type?.toLowerCase() === activeTab.toLowerCase(),
+    );
+
+    if (isPending) {
+      return <Loading />;
+    }
 
     return (
       <TouchableOpacity
@@ -120,35 +123,29 @@ export default function Stations() {
         onPress={() => handleBuyFuel(item)}
       >
         <View style={styles.leftSection}>
-          {/* Use station logo if your API returns one.
-              Otherwise use your default image. */}
           <Image
-            source={require("../../../assets/png/gas-station-icon.png")}
+            source={require("../../../assets/svg/gas-station.svg")}
             style={styles.logo}
           />
 
           <View style={styles.stationInfo}>
             <Text style={styles.stationName}>
-              {item.name}
+              {item?.name?.length > 20
+                ? `${item.name.substring(0, 20)}...`
+                : item?.name}
             </Text>
 
             <View style={styles.metaRow}>
-              <MaterialIcons
-                name="location-pin"
-                size={13}
-                color="#E74C3C"
-              />
+              <MaterialIcons name="location-pin" size={13} color="#E74C3C" />
 
               <Text style={styles.metaText}>
-                {item.distance
-                  ? `${item.distance} km`
-                  : "Nearby"}
+                {item?.latitude ? `${item?.latitude} km` : "Nearby"}
               </Text>
 
               <Text style={styles.metaDot}>•</Text>
 
               <Text style={styles.metaText}>
-                {item.status || "Available"}
+                {formatOperatingHours(item?.operatingHours)}
               </Text>
             </View>
           </View>
@@ -158,34 +155,28 @@ export default function Stations() {
           <View
             style={[
               styles.officeHourContainer,
-              isOpen
-                ? styles.openBadge
-                : styles.closedBadge,
+              isOpen ? styles.openBadge : styles.closedBadge,
             ]}
           >
             <Text
               style={[
                 styles.officeHour,
-                isOpen
-                  ? styles.openText
-                  : styles.closedText,
+                isOpen ? styles.openText : styles.closedText,
               ]}
             >
-              {item.status || "Closed"}
+              {isOpen ? "Open" : "Closed"}
             </Text>
           </View>
 
           <View style={styles.imageLitre}>
             <Image
-              source={require(
-                "../../../assets/png/gas-station-icon.png"
-              )}
+              source={require("../../../assets/svg/gas-station.svg")}
               style={styles.fuelIcon}
             />
 
             <Text>
-              {item.price
-                ? `₦${item.price}/L`
+              {selectedProduct?.pricePerLitre
+                ? `₦${selectedProduct.pricePerLitre}/L`
                 : "N/A"}
             </Text>
           </View>
@@ -194,9 +185,6 @@ export default function Stations() {
     );
   };
 
-  /**
-   * Header
-   */
   const renderHeader = () => (
     <>
       <SettingsHeader title="List of Fuel Stations" />
@@ -217,15 +205,8 @@ export default function Stations() {
 
           return (
             <View style={styles.tabItemWrapper}>
-              <TouchableOpacity
-                onPress={() => setActiveTab(item)}
-              >
-                <Text
-                  style={[
-                    styles.tabText,
-                    active && styles.activeTabText,
-                  ]}
-                >
+              <TouchableOpacity onPress={() => setActiveTab(item)}>
+                <Text style={[styles.tabText, active && styles.activeTabText]}>
                   {item}
                 </Text>
               </TouchableOpacity>
@@ -243,125 +224,87 @@ export default function Stations() {
         title="Filter"
         onClose={() => setOpenFilterModal(false)}
       >
-        <FileterModal
-          setOpenFilterModal={setOpenFilterModal}
-        />
+        <FileterModal setOpenFilterModal={setOpenFilterModal} />
       </ReuseableBottomModal>
     </>
   );
 
-  /**
-   * Location permission error
-   */
-  if (locationError) {
-    return (
-      <View style={styles.center}>
-        <MaterialIcons
-          name="location-off"
-          size={45}
-          color="#540863"
-        />
-
-        <Text style={styles.emptyTitle}>
-          Location unavailable
-        </Text>
-
-        <Text style={styles.emptyText}>
-          {locationError}
-        </Text>
-      </View>
-    );
-  }
-
-  /**
-   * Waiting for location
-   */
-  if (latitude === undefined || longitude === undefined) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator
-          size="large"
-          color="#540863"
-        />
-
-        <Text style={styles.loadingText}>
-          Getting your location...
-        </Text>
-      </View>
-    );
-  }
-
-  /**
-   * Loading stations
-   */
-  if (isPending) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator
-          size="large"
-          color="#540863"
-        />
-
-        <Text style={styles.loadingText}>
-          Finding nearby stations...
-        </Text>
-      </View>
-    );
-  }
-
-  /**
-   * API error
-   */
-  if (isError) {
-    return (
-      <View style={styles.center}>
-        <MaterialIcons
-          name="error-outline"
-          size={45}
-          color="#D92D20"
-        />
-
-        <Text style={styles.emptyTitle}>
-          Unable to load stations
-        </Text>
-
-        <Text style={styles.emptyText}>
-          {error instanceof Error
-            ? error.message
-            : "Something went wrong"}
-        </Text>
-      </View>
-    );
-  }
-
   return (
     <View style={styles.page}>
       <FlatList
-        data={stationList}
-        keyExtractor={(item, index) =>
-          item.id?.toString() || index.toString()
-        }
+        data={paginatedStations}
+        keyExtractor={(item) => item.id}
         renderItem={renderStation}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.container}
         ListHeaderComponent={renderHeader}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <MaterialIcons
-              name="local-gas-station"
-              size={50}
-              color="#540863"
-            />
+            <MaterialIcons name="local-gas-station" size={50} color="#540863" />
 
-            <Text style={styles.emptyTitle}>
-              No nearby stations
-            </Text>
+            <Text style={styles.emptyTitle}>{activeTab} not available</Text>
 
             <Text style={styles.emptyText}>
-              We couldn't find any fuel stations
-              within 10km of your current location.
+              No fuel station currently has {activeTab} available.
             </Text>
           </View>
+        }
+        ListFooterComponent={
+          paginatedStations.length > 0 ? (
+            <View style={styles.pagination}>
+              <TouchableOpacity
+                style={[
+                  styles.paginationButton,
+                  currentPage === 1 && styles.disabledButton,
+                ]}
+                disabled={currentPage === 1}
+                onPress={() => setCurrentPage((prev) => prev - 1)}
+              >
+                <MaterialIcons
+                  name="chevron-left"
+                  size={24}
+                  color={currentPage === 1 ? "#BDBDBD" : "#7C3AED"}
+                />
+
+                <Text
+                  style={[
+                    styles.paginationText,
+                    currentPage === 1 && styles.disabledText,
+                  ]}
+                >
+                  Previous
+                </Text>
+              </TouchableOpacity>
+
+              <Text style={styles.pageNumber}>
+                {currentPage} / {totalPages}
+              </Text>
+
+              <TouchableOpacity
+                style={[
+                  styles.paginationButton,
+                  currentPage === totalPages && styles.disabledButton,
+                ]}
+                disabled={currentPage === totalPages}
+                onPress={() => setCurrentPage((prev) => prev + 1)}
+              >
+                <Text
+                  style={[
+                    styles.paginationText,
+                    currentPage === totalPages && styles.disabledText,
+                  ]}
+                >
+                  Next
+                </Text>
+
+                <MaterialIcons
+                  name="chevron-right"
+                  size={24}
+                  color={currentPage === totalPages ? "#BDBDBD" : "#7C3AED"}
+                />
+              </TouchableOpacity>
+            </View>
+          ) : null
         }
       />
     </View>
@@ -480,7 +423,7 @@ const styles = StyleSheet.create({
   },
 
   metaText: {
-    fontSize: 15,
+    fontSize: 13,
     color: "#8E8E93",
   },
 
@@ -530,5 +473,44 @@ const styles = StyleSheet.create({
     width: 18,
     height: 18,
     resizeMode: "contain",
+  },
+
+  pagination: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 20,
+    paddingVertical: 15,
+  },
+
+  paginationButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderWidth: 1,
+    borderColor: "#7C3AED",
+    borderRadius: 8,
+  },
+
+  disabledButton: {
+    borderColor: "#E2E2E5",
+  },
+
+  paginationText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#7C3AED",
+  },
+
+  disabledText: {
+    color: "#BDBDBD",
+  },
+
+  pageNumber: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#555",
   },
 });

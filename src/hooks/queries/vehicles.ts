@@ -3,7 +3,7 @@ import { getVehicles } from "../../api/vehicles";
 
 export const useVehicles = (id?: string) => {
   return useQuery({
-    queryKey: ["vehicles"],
+    queryKey: ["vehicles", id],
     queryFn: () => getVehicles(id!),
     enabled: !!id,
     retry: false,

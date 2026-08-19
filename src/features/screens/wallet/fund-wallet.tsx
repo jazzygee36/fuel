@@ -1,43 +1,78 @@
-import { useNavigation } from "@react-navigation/native";
 import { View, Text, StyleSheet, Pressable } from "react-native";
-import { RootStackParamList } from "../../../navigation/types";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useWallet } from "../../../hooks/queries/wallet";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../../../navigation/types";
 
 interface Props {
-  setStep: React.Dispatch<React.SetStateAction<number>>;
+  route?: string;
+  setStep?: React.Dispatch<React.SetStateAction<number>>;
+  onAddFunds?: () => void;
 }
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-export default function FundWallet({ setStep }: Props) {
+export default function FundWallet({
+  route,
+  setStep,
+  onAddFunds,
+}: Props) {
   const navigation = useNavigation<NavigationProp>();
   const { data: wallet } = useWallet();
 
+  const handleFundWallet = () => {
+    if (setStep ) {
+      setStep(1);
+    }
+    navigation.navigate("Wallet");
+  };
+
+  const handleAddFunds = () => {
+    if (onAddFunds) {
+      onAddFunds();
+      return;
+    }
+
+    if (setStep) {
+      setStep(2);
+    }
+  };
 
   return (
     <View style={styles.balanceCard}>
       <View>
         <Text style={styles.balanceLabel}>Total Balance</Text>
-        <Text style={styles.balanceAmount}>₦{wallet?.balance}</Text>
+
+        <Text style={styles.balanceAmount}>
+          ₦{Number(wallet?.balance ?? 0).toLocaleString()}
+        </Text>
       </View>
 
-      <Pressable
-        onPress={() => {
-          setStep(2);
-        }}
-      >
-        <Text style={styles.fundWallet}>Fund Wallet</Text>
-      </Pressable>
+      <View style={styles.actions}>
+        {/* Show Fund Wallet only when NOT already on Wallet */}
+        {route !== "Wallet" && (
+          <Pressable onPress={handleFundWallet}>
+            <Text style={styles.fundWallet}>Fund Wallet</Text>
+          </Pressable>
+        )}
+
+        {/* Add Funds */}
+        {route === "Wallet" && (
+          <Pressable onPress={handleAddFunds}>
+            <Text style={styles.fundWallet}>Add Funds</Text>
+          </Pressable>
+        )}
+      </View>
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   balanceCard: {
     width: "100%",
     backgroundColor: "#1A1C1E",
     paddingVertical: 22,
-    paddingHorizontal: 18, 
+    paddingHorizontal: 18,
     borderRadius: 9,
     flexDirection: "row",
     justifyContent: "space-between",
@@ -57,14 +92,18 @@ const styles = StyleSheet.create({
     fontFamily: "BricolageGrotesque",
   },
 
+  actions: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
   fundWallet: {
     color: "#FFFFFF",
     fontSize: 14,
     fontWeight: "600",
     backgroundColor: "#8167BA",
-    paddingVertical: 4,
+    paddingVertical: 6,
     paddingHorizontal: 11,
     borderRadius: 50,
-    cursor: "pointer",
   },
 });

@@ -7,30 +7,42 @@ export const useAddVehicles = (id: string) => {
   return useMutation({
     mutationFn: (vehicleData: Parameters<typeof createVehicles>[1]) =>
       createVehicles(id, vehicleData),
-
-    onSuccess: async (data: Awaited<ReturnType<typeof createVehicles>>) => {
-      await token.setAccessToken(data.access_token);
-    },
   });
 };
 
-export const useDeleteVehicle = () => {
+export const useDeleteVehicle = (userId?: string) => {
   return useMutation({
     mutationFn: (vehicleId: string) => deleteVehicles(vehicleId),
 
-    onSuccess: (_, vehicleId) => {
-      queryClient.setQueriesData(
-        { queryKey: ["vehicles"] },
-        (oldData: any[] | undefined) => {
-          if (!oldData) return oldData;
+    onMutate: async (vehicleId) => {
+      await queryClient.cancelQueries({
+        queryKey: ["vehicles", userId],
+      });
 
-          return oldData.filter((vehicle) => vehicle.id !== vehicleId);
-        },
+      const previousVehicles = queryClient.getQueryData<any[]>([
+        "vehicles",
+        userId,
+      ]);
+
+      queryClient.setQueryData<any[]>(
+        ["vehicles", userId],
+        (oldVehicles = []) =>
+          oldVehicles.filter((vehicle) => vehicle.id !== vehicleId)
       );
 
-      // Refetch in the background to keep the cache in sync
+      return { previousVehicles };
+    },
+
+    onError: (_error, _vehicleId, context) => {
+      queryClient.setQueryData(
+        ["vehicles", userId],
+        context?.previousVehicles
+      );
+    },
+
+    onSettled: () => {
       queryClient.invalidateQueries({
-        queryKey: ["vehicles"],
+        queryKey: ["vehicles", userId],
       });
     },
   });

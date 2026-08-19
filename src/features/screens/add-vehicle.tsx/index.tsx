@@ -15,11 +15,18 @@ import { VehicleDto } from "../../../utils/types";
 import { useAddVehicles } from "../../../hooks/mutations/vehicles";
 import { useCurrentUserId } from "../../../hooks/queries/useCurrentUser";
 import SelectInput from "../../../components/select-input";
+import Loading from "../../../components/loading";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../../../navigation/types";
+import { useNavigation } from "@react-navigation/native";
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 
 export default function AddVehicle() {
   const { data: userId } = useCurrentUserId();
   const { mutate, isPending } = useAddVehicles(userId?.id);
+    const navigation = useNavigation<NavigationProp>();
+  
 
   const {
     control,
@@ -52,7 +59,7 @@ export default function AddVehicle() {
     };
     mutate(payload, {
       onSuccess: () => {
-        navigation.navigate("AddVehicle");
+        navigation.navigate("VehicleSettings");
       },
     });
   };
@@ -198,13 +205,7 @@ export default function AddVehicle() {
           />
         </View>
         <AppButton
-          title={
-            isPending ? (
-              <ActivityIndicator size="large" color="#909194" />
-            ) : (
-              "Save vehicle"
-            )
-          }
+          title={isPending ? <Loading /> : "Save vehicle"}
           variant="filled"
           backgroundColor="#540863"
           onPress={handleSubmit(onSubmit)}
@@ -243,10 +244,5 @@ const styles = StyleSheet.create({
     fontFamily: "BricolageGrotesque",
     color: "#151521",
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#fff",
-  },
+
 });

@@ -15,6 +15,7 @@ type AuthContextType = {
   user: any;
   isAuthenticated: boolean;
   isLoading: boolean;
+  login: (accessToken: string) => Promise<void>;
   logout: () => Promise<void>;
 };
 
@@ -23,53 +24,74 @@ const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const queryClient = useQueryClient();
 
-  const [hasToken, setHasToken] = useState(false);
-  const [checkingAuth, setCheckingAuth] = useState(true);
+  const [hasToken, setHasToken] = useState<boolean | null>(null);
+
+  const {
+    data: user,
+    isLoading: userLoading,
+    isError,
+    error,
+  } = useCurrentUser(hasToken === true);
 
   useEffect(() => {
     const checkToken = async () => {
-      const accessToken = await token.getAccessToken();
+      try {
+        const accessToken = await token.getAccessToken();
 
-      setHasToken(!!accessToken);
-      setCheckingAuth(false);
+        setHasToken(!!accessToken);
+      } catch (error) {
+        setHasToken(false);
+      }
     };
 
     checkToken();
   }, []);
 
-  const { data: user, isLoading, isError } = useCurrentUser();
+  const login = async (accessToken: string) => {
+    console.log("LOGIN TOKEN:", accessToken);
 
-  useEffect(() => {
-    if (hasToken && isError) {
-      logout();
-    }
-  }, [hasToken, isError]);
+    await token.setAccessToken(accessToken);
+
+    const savedToken = await token.getAccessToken();
+
+    console.log("TOKEN AFTER SAVING:", savedToken);
+
+    setHasToken(true);
+
+    // Make sure /me runs after the token has been stored
+    await queryClient.invalidateQueries({
+      queryKey: ["me"],
+    });
+  };
 
   const logout = async () => {
+    console.log("LOGOUT CALLED");
+
     await token.clearTokens();
 
     queryClient.removeQueries({
-      queryKey: ["currentUser"],
+      queryKey: ["me"],
     });
 
     setHasToken(false);
   };
 
   useEffect(() => {
-    const checkToken = async () => {
-      const accessToken = await token.getAccessToken();
-      setHasToken(!!accessToken);
-      setCheckingAuth(false);
-    };
+    console.log({
+      hasToken,
+      isError,
+      error,
+      user,
+    });
+  }, [hasToken, isError, error, user]);
 
-    checkToken();
-  }, []);
   return (
     <AuthContext.Provider
       value={{
         user,
-        isAuthenticated: hasToken,
-        isLoading: checkingAuth || (hasToken && isLoading),
+        isAuthenticated: hasToken === true,
+        isLoading: hasToken === null || (hasToken && userLoading),
+        login,
         logout,
       }}
     >

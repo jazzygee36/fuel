@@ -17,3 +17,9 @@ export const nearbyStations = async (
 
   return data;
 };
+
+export const getAllStations = async () => {
+  const { data } = await api.get(`/stations`);
+
+  return data;
+};

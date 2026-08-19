@@ -4,6 +4,7 @@ import BarcodeModal from "../../../components/barcode";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../../navigation/types";
+import AppButton from "../../../components/button";
 interface TransProps {
   setStep: React.Dispatch<React.SetStateAction<number>>;
   selectionHis: any;
@@ -80,7 +81,7 @@ export default function TransactionView({ setStep, selectionHis }: TransProps) {
         <Text style={styles.virtualLabel}>
           If there are any issues surrounding this transaction, kindly reach out
           to the{" "}
-          <Pressable onPress={() => navigation.navigate("HelpSupport")}>
+          <Pressable onPress={() => navigation.navigate("Support")}>
             support group
           </Pressable>{" "}
           to treat as urgent
@@ -92,6 +93,14 @@ export default function TransactionView({ setStep, selectionHis }: TransProps) {
         value={barcodeValue}
         title={"Scan Code"}
       />
+      <View style={styles.footer}>
+        <AppButton
+          title={"Download receipt"}
+          backgroundColor="#540863"
+          textColor="#fff"
+          // onPress={handleStep}
+        />
+      </View>
     </View>
   );
 }
@@ -163,5 +172,11 @@ const styles = StyleSheet.create({
     color: "#000000",
     fontSize: 13,
     textAlign: "center",
+  },
+
+  footer: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: "#fff",
   },
 });

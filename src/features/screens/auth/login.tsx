@@ -16,6 +16,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoginForm, loginSchema } from "../../../utils/validation";
 import { LoginDto } from "../../../utils/types";
+import Loading from "../../../components/loading";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -40,11 +41,8 @@ export default function Login() {
       email: data.email,
       password: data.password,
     };
-    mutate(payload, {
-      onSuccess: () => {
-        navigation.navigate("dashboard");
-      },
-    });
+
+    mutate(payload);
   };
 
   return (
@@ -108,18 +106,12 @@ export default function Login() {
         <AppButton
           backgroundColor={"#540863"}
           textColor="#fff"
-          title={
-            isPending ? (
-              <ActivityIndicator size="large" color="#909194" />
-            ) : (
-              "Login"
-            )
-          }
+          title={isPending ? <Loading /> : "Login"}
           onPress={handleSubmit(onSubmit)}
         />
 
         <Text style={{ textAlign: "center", marginTop: 17.5 }}>
-          Don't have an account? 
+          Don't have an account?
           <Text
             style={styles.signUpText}
             onPress={() => navigation.navigate("register" as never)}

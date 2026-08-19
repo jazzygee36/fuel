@@ -87,7 +87,7 @@ export default function Settings() {
         {/* User card */}
         <Pressable
           style={styles.userDetails}
-          onPress={() => navigation.navigate("AccountSettings")}
+          onPress={() => navigation.navigate("Settings")}
         >
           <View style={styles.userProfile}>
             <Image

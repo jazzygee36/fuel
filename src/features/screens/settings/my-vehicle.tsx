@@ -18,12 +18,14 @@ import ReuseableBottomModal from "../../../components/reuseable-bottom-modal";
 import { useVehicles } from "../../../hooks/queries/vehicles";
 import { useCurrentUserId } from "../../../hooks/queries/useCurrentUser";
 import { useDeleteVehicle } from "../../../hooks/mutations/vehicles";
+import Loading from "../../../components/loading";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function VehicleSettings() {
   const { data: userId } = useCurrentUserId();
   const { data: vehicles, isPending } = useVehicles(userId?.id);
+    console.log("deleteVehicle", vehicles);
 
   const [selected, setSelected] = useState("");
   const [openMenuIndex, setOpenMenuIndex] = useState<number | null>(null);
@@ -31,10 +33,10 @@ export default function VehicleSettings() {
 
   const { mutate: deleteVehicle, isPending: isDeleting } = useDeleteVehicle();
 
+
   const navigation = useNavigation<NavigationProp>();
 
   const handleDelete = (vehicleId: string) => {
-    console.log("DELETE CLICKED:", vehicleId);
 
     setSelected(vehicleId);
     setOpenMenuIndex(null);
@@ -58,11 +60,7 @@ export default function VehicleSettings() {
   };
 
   if (isPending) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#540863" />
-      </View>
-    );
+    return <Loading />;
   }
 
   const hasVehicles = Array.isArray(vehicles) && vehicles.length > 0;
@@ -229,15 +227,6 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
     flexGrow: 1,
   },
-
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#fff",
-  },
-
-  /* ================= VEHICLES ================= */
 
   vehicleContainer: {
     marginVertical: 30,

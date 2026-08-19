@@ -15,16 +15,19 @@ import ContinueModal from "./continue-modal";
 import FileterModal from "./filter-moda";
 import VerificationModal from "./verification-modal";
 import { useNavigation } from "@react-navigation/native";
-import { RootStackParamList } from "../../../navigation/types";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { AppTabParamList, RootStackParamList } from "../../../navigation/types";
+import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import { Entypo } from "@expo/vector-icons";
 import { useCurrentUser } from "../../../hooks/queries/useCurrentUser";
-type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+type RootNavigationProp = NativeStackNavigationProp<RootStackParamList>;
+type TabNavigationProp = BottomTabNavigationProp<AppTabParamList>;
 
 export default function Dashboard() {
   const { data: Users } = useCurrentUser();
   console.log("Users", Users);
-  const navigation = useNavigation<NavigationProp>();
+  const rootNavigation = useNavigation<RootNavigationProp>();
+  const tabNavigation = useNavigation<TabNavigationProp>();
 
   const [open, setOpen] = useState(false);
   const [openFilterModal, setOpenFilterModal] = useState(false);
@@ -109,20 +112,22 @@ export default function Dashboard() {
       />
 
       <View style={{ marginTop: 25 }}>
-        <Pressable onPress={() => navigation.navigate("Wallet")}>
-          <FundWallet setStep={() => {}} />
-        </Pressable>
+        <View>
+         <FundWallet  />
+        </View>
       </View>
       <View style={styles.stationsMap}>
         <View style={styles.station}>
-          <Pressable onPress={() => navigation.navigate("Stations")}>
+          <Pressable onPress={() => tabNavigation.navigate("Stations")}>
             <Image
               source={require("../../../assets/png/fuelStation.png")}
               // style={styles.stationImage}
               // resizeMode="cover"
             />
           </Pressable>
-          <Pressable onPress={() => navigation.navigate("TransactionHistory")}>
+          <Pressable
+            onPress={() => rootNavigation.navigate("TransactionHistory")}
+          >
             <Image
               source={require("../../../assets/png/trans.png")}
               // style={styles.stationImage}
@@ -131,7 +136,7 @@ export default function Dashboard() {
           </Pressable>
         </View>
         <View style={styles.station}>
-          <Pressable onPress={() => navigation.navigate("VehicleSettings")}>
+          <Pressable onPress={() => rootNavigation.navigate("VehicleSettings")}>
             <Image
               source={require("../../../assets/png/vehicle.png")}
               // style={styles.stationImage}
