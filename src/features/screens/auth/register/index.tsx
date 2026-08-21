@@ -20,20 +20,14 @@ const account = [
     path: "individual",
     image: require("../../../../assets/png/signup-user.png"),
   },
-  {
-    title: "Corporate",
-    desc: "For managing company vehicles and fuel expenses",
-    color: "#CAE0ED",
-    path: "corporate",
-    image: require("../../../../assets/png/signup-shop.png"),
-  },
   // {
-  //   title: "Insurance",
+  //   title: "Corporate",
   //   desc: "For managing company vehicles and fuel expenses",
-  //   color: "#B3FAFF",
-  //   image: require("../../../../assets/png/signup-shield-tick.png"),
-  //   path: "register/insurance",
+  //   color: "#CAE0ED",
+  //   path: "corporate",
+  //   image: require("../../../../assets/png/signup-shop.png"),
   // },
+ 
 ];
 
 export default function Register() {
@@ -75,7 +69,7 @@ export default function Register() {
             </Pressable>
           ))}
           <Text style={{ textAlign: "center", marginTop: 17.5 }}>
-            Already have an account? 
+            Already have an account? {''}
             <Text
               style={styles.signUpText}
               onPress={() => navigation.navigate("login")}

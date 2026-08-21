@@ -1,3 +1,4 @@
+import { SignUpDto } from "../utils/types";
 import api from "./axios";
 
 export interface LoginDto {
@@ -10,19 +11,14 @@ export interface LoginResponse {
   refresh_token?: string;
 }
 
-export interface RegisterDto {
-  email: string;
-  password: string;
-}
-
 export const login = async (payload: LoginDto): Promise<LoginResponse> => {
   const { data } = await api.post("/auth/login", payload);
 
   return data;
 };
 
-export const register = async (payload: RegisterDto) => {
-  const { data } = await api.post("/auth/register", payload);
+export const register = async (payload: SignUpDto) => {
+  const { data } = await api.post("/auth/register/individual", payload);
 
   return data;
 };
@@ -40,7 +36,7 @@ export const getCurrentUserId = async () => {
 };
 
 export const logout = async () => {
-  const { data } = await api.post("/auth/logout");
+  const { data } = await api.post("/auth/logout-all");
 
   return data;
 };

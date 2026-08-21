@@ -16,19 +16,19 @@ import SettingsHeader from "./header";
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const settingsData = [
-  {
-    title: "Biometric Login",
-    description: "Use fingerprints instead",
-    rightText: "NGN",
-    rightTextColor: "#8B8B8B",
-  },
-  {
-    title: "Transaction Pin",
-    description: "Setup your transaction pin",
-    rightText: "NGN",
-    rightTextColor: "#8B8B8B",
-    route: "UpdateTransactionPin",
-  },
+  // {
+  //   title: "Biometric Login",
+  //   description: "Use fingerprints instead",
+  //   rightText: "NGN",
+  //   rightTextColor: "#8B8B8B",
+  // },
+  // {
+  //   title: "Transaction Pin",
+  //   description: "Setup your transaction pin",
+  //   rightText: "NGN",
+  //   rightTextColor: "#8B8B8B",
+  //   route: "UpdateTransactionPin",
+  // },
   {
     title: "Change Login Password",
     description: "Update your login password",

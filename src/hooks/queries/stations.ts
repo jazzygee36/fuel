@@ -12,7 +12,7 @@ export const useNearbyStations = (lat?: number, lng?: number) => {
 export const useAllStations = (enabled = true) => {
   return useQuery({
     queryKey: ["stations"],
-    queryFn: getAllStations,
+    queryFn:  getAllStations,
     enabled,
     retry: false,
   });

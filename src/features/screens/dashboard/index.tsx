@@ -1,3 +1,5 @@
+import * as Location from "expo-location";
+import { useEffect, useState } from "react";
 import {
   ScrollView,
   View,
@@ -7,7 +9,6 @@ import {
   TouchableOpacity,
   Pressable,
 } from "react-native";
-import { useState } from "react";
 import ReuseableBottomModal from "../../../components/reuseable-bottom-modal";
 import FundWallet from "../wallet/fund-wallet";
 import SearchBar from "../../../components/search-bar";
@@ -28,10 +29,11 @@ export default function Dashboard() {
   console.log("Users", Users);
   const rootNavigation = useNavigation<RootNavigationProp>();
   const tabNavigation = useNavigation<TabNavigationProp>();
-
   const [open, setOpen] = useState(false);
   const [openFilterModal, setOpenFilterModal] = useState(false);
   const [verifyModal, setVerifyModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
   const [ads, setAds] = useState([
     {
       id: 1,
@@ -49,6 +51,88 @@ export default function Dashboard() {
       description: "Earn rewards on every transaction",
     },
   ]);
+  const [locationName, setLocationName] = useState("Getting location...");
+
+  useEffect(() => {
+    const getCurrentLocation = async () => {
+      try {
+        setLocationName("Getting location...");
+
+        // 1. Check if location services are enabled
+        const servicesEnabled = await Location.hasServicesEnabledAsync();
+
+        console.log("Location services enabled:", servicesEnabled);
+
+        if (!servicesEnabled) {
+          setLocationName("Turn on location");
+          return;
+        }
+
+        // 2. Request permission
+        const { status } = await Location.requestForegroundPermissionsAsync();
+
+        console.log("Location permission:", status);
+
+        if (status !== "granted") {
+          setLocationName("Location permission denied");
+          return;
+        }
+
+        // 3. Get last known location first
+        const lastKnown = await Location.getLastKnownPositionAsync({
+          maxAge: 60000,
+          requiredAccuracy: 100,
+        });
+
+        console.log("Last known location:", lastKnown);
+
+        // 4. Get current location
+        const location = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+        });
+
+        console.log("Current location:", location);
+
+        const { latitude, longitude } = location.coords;
+
+        console.log("Latitude:", latitude);
+        console.log("Longitude:", longitude);
+
+        // 5. Reverse geocode
+        const address = await Location.reverseGeocodeAsync({
+          latitude,
+          longitude,
+        });
+
+        console.log("Reverse geocode:", address);
+
+        if (address.length > 0) {
+          const place = address[0];
+
+          console.log("Place:", place);
+
+          const locationParts = [
+            place.name,
+            place.street,
+            place.district,
+            place.city,
+            place.region,
+          ].filter(Boolean);
+
+          const formattedLocation = locationParts.join(", ");
+
+          setLocationName(formattedLocation || "Location unavailable");
+        } else {
+          setLocationName("Location unavailable");
+        }
+      } catch (error) {
+        console.error("LOCATION ERROR:", error);
+        setLocationName("Location unavailable");
+      }
+    };
+
+    getCurrentLocation();
+  }, []);
 
   const closeAd = (id: number) => {
     setAds((prev) => prev.filter((ad) => ad.id !== id));
@@ -84,13 +168,16 @@ export default function Dashboard() {
             </Text>
             <Text style={styles.desc}>
               <Entypo name="location-pin" size={12} color="black" />
-              Victoria Island, Lagos
+              {locationName}
             </Text>
           </View>
         </View>
 
         <View style={styles.flexCircle}>
-          <Pressable style={styles.circle}>
+          <Pressable
+            style={styles.circle}
+            onPress={() => rootNavigation.navigate("TransactionHistory")}
+          >
             <Image
               source={require("../../../assets/png/message.png")}
               // style={styles.stationImage}
@@ -108,12 +195,14 @@ export default function Dashboard() {
       </View>
       <SearchBar
         placeholder="Search name/location"
+        value={searchQuery}
+        onSearch={setSearchQuery}
         onPress={() => setOpenFilterModal(true)}
       />
 
       <View style={{ marginTop: 25 }}>
         <View>
-         <FundWallet  />
+          <FundWallet />
         </View>
       </View>
       <View style={styles.stationsMap}>
@@ -151,19 +240,40 @@ export default function Dashboard() {
         </View>
       </View>
       <View style={styles.verifyIdentity}>
-        <View>
+        <View style={styles.verifyLeft}>
           <Text style={styles.verifyText}>Verify your identity</Text>
+
+          <View style={styles.progressBar}>
+            <View
+              style={[
+                styles.progress,
+                Users?.isVerified && styles.progressComplete,
+              ]}
+            />
+          </View>
         </View>
+
         <TouchableOpacity
-          style={styles.verifyContinue}
+          style={[
+            styles.verifyContinue,
+            Users?.isVerified && styles.verifiedButton,
+          ]}
+          disabled={Users?.isVerified}
           onPress={() => setVerifyModal(true)}
         >
-          <Text style={styles.verifyText}>Continue</Text>
-          <Image
-            source={require("../../../assets/png/continue.png")}
-            // style={styles.stationImage}
-            resizeMode="cover"
-          />
+          <Text style={styles.continueText}>
+            {Users?.isVerified ? "Verified" : "Continue"}
+          </Text>
+
+          {!Users?.isVerified && (
+            <View style={styles.arrowCircle}>
+              <Image
+                source={require("../../../assets/png/continue.png")}
+                style={styles.arrowImage}
+                resizeMode="contain"
+              />
+            </View>
+          )}
         </TouchableOpacity>
       </View>
       {ads.map((ad) => (
@@ -303,22 +413,75 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginVertical: 29,
+    gap: 15,
   },
+
+  verifyLeft: {
+    flex: 1,
+  },
+
   verifyText: {
     fontSize: 12,
     fontWeight: "bold",
     color: "#3A3B3E",
-    cursor: "pointer",
+    marginBottom: 8,
   },
+
+  progressBar: {
+    width: "70%",
+    height: 7,
+    backgroundColor: "#B7B7B7",
+    borderRadius: 10,
+    overflow: "hidden",
+  },
+
+  progress: {
+    width: "35%",
+    height: "100%",
+    backgroundColor: "#FF9B2F",
+    borderRadius: 10,
+  },
+
+  progressComplete: {
+    width: "100%",
+    backgroundColor: "#4CD080",
+  },
+
   verifyContinue: {
     backgroundColor: "#E1D8F5",
     paddingVertical: 7,
-    paddingHorizontal: 8,
+    paddingLeft: 10,
+    paddingRight: 7,
     borderRadius: 50,
     flexDirection: "row",
+    alignItems: "center",
     gap: 7,
+  },
+
+  verifiedButton: {
+    backgroundColor: "#DFF5E8",
+  },
+
+  continueText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#3A3B3E",
+  },
+
+  arrowCircle: {
+    width: 21,
+    height: 21,
+    borderRadius: 11,
+    backgroundColor: "#665096",
+    justifyContent: "center",
     alignItems: "center",
   },
+
+  arrowImage: {
+    width: 14,
+    height: 14,
+  },
+
   continueArrow: {
     borderRadius: "100%",
     padding: 2,

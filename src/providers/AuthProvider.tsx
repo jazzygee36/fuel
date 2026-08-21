@@ -7,6 +7,7 @@ import {
 } from "react";
 
 import { useQueryClient } from "@tanstack/react-query";
+import { logout as logoutApi } from "../api/auth";
 
 import { token } from "../storage/token";
 import { useCurrentUser } from "../hooks/queries/useCurrentUser";
@@ -67,13 +68,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = async () => {
     console.log("LOGOUT CALLED");
 
-    await token.clearTokens();
+    try {
+      await logoutApi();
+    } catch (error) {
+      console.log("Logout API failed:", error);
+    } finally {
+      // Always clear the local session
+      await token.clearTokens();
 
-    queryClient.removeQueries({
-      queryKey: ["me"],
-    });
+      queryClient.removeQueries({
+        queryKey: ["me"],
+      });
 
-    setHasToken(false);
+      setHasToken(false);
+    }
   };
 
   useEffect(() => {

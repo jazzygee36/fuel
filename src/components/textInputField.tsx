@@ -92,15 +92,16 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
   },
 
-  inputError: {
-    borderColor: "#EF4444",
-  },
-
   input: {
     flex: 1,
     fontSize: 15,
     color: "#000",
+    backgroundColor: "transparent",
     outlineColor: "transparent",
+  },
+
+  inputError: {
+    borderColor: "#EF4444",
   },
 
   icon: {

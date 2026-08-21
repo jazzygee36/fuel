@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -25,7 +25,9 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function Stations() {
   const navigation = useNavigation<NavigationProp>();
+  const [searchQuery, setSearchQuery] = useState("");
   const { data: stationsResponse, isPending } = useAllStations();
+  console.log("stationsResponse", stationsResponse);
 
   const [activeTab, setActiveTab] = useState("Petrol");
   const [openFilterModal, setOpenFilterModal] = useState(false);
@@ -38,12 +40,33 @@ export default function Stations() {
     ? stationsResponse
     : (stationsResponse?.stations ?? []);
   console.log("stations", stations);
-  const filteredStations = stations.filter((station: any) =>
-    station?.products?.some(
+  const filteredStations = stations.filter((station: any) => {
+    const hasFuelType = station?.products?.some(
       (product: any) =>
         product?.type?.toLowerCase() === activeTab.toLowerCase(),
-    ),
-  );
+    );
+
+    if (!hasFuelType) return false;
+
+    const search = searchQuery.trim().toLowerCase();
+
+    if (!search) return true;
+
+    const searchableText = [
+      station?.name,
+      station?.address,
+      station?.city,
+      station?.state,
+      station?.location?.address,
+      station?.location?.city,
+      station?.location?.state,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+
+    return searchableText.includes(search);
+  });
 
   const totalPages = Math.ceil(filteredStations.length / stationsPerPage);
 
@@ -71,11 +94,15 @@ export default function Stations() {
       const period = hour >= 12 ? "PM" : "AM";
       const formattedHour = hour % 12 || 12;
 
-      return `${formattedHour}:${minute.toString().padStart(2, "0")} ${period}`;
+      return `${formattedHour}:${minute.toString().padStart(1, "0")} ${period}`;
     };
 
     return `${formatTime(open)} - ${formatTime(close)}`;
   };
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, activeTab]);
 
   const isCurrentlyOpen = (hours?: string) => {
     if (!hours) return false;
@@ -185,49 +212,56 @@ export default function Stations() {
     );
   };
 
-  const renderHeader = () => (
-    <>
-      <SettingsHeader title="List of Fuel Stations" />
+  const listHeader = (
+  <>
+    <SettingsHeader title="List of Fuel Stations" />
 
-      <SearchBar
-        placeholder="Search name/location"
-        onPress={() => setOpenFilterModal(true)}
-      />
+    <SearchBar
+      placeholder="Search name/location"
+      value={searchQuery}
+      onSearch={setSearchQuery}
+      onPress={() => setOpenFilterModal(true)}
+    />
 
-      <FlatList
-        data={fuelTabs}
-        keyExtractor={(item) => item}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.tabsContainer}
-        renderItem={({ item, index }) => {
-          const active = activeTab === item;
+    <FlatList
+      data={fuelTabs}
+      keyExtractor={(item) => item}
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={styles.tabsContainer}
+      renderItem={({ item, index }) => {
+        const active = activeTab === item;
 
-          return (
-            <View style={styles.tabItemWrapper}>
-              <TouchableOpacity onPress={() => setActiveTab(item)}>
-                <Text style={[styles.tabText, active && styles.activeTabText]}>
-                  {item}
-                </Text>
-              </TouchableOpacity>
+        return (
+          <View style={styles.tabItemWrapper}>
+            <TouchableOpacity onPress={() => setActiveTab(item)}>
+              <Text
+                style={[
+                  styles.tabText,
+                  active && styles.activeTabText,
+                ]}
+              >
+                {item}
+              </Text>
+            </TouchableOpacity>
 
-              {index !== fuelTabs.length - 1 && (
-                <Text style={styles.dot}>•</Text>
-              )}
-            </View>
-          );
-        }}
-      />
+            {index !== fuelTabs.length - 1 && (
+              <Text style={styles.dot}>•</Text>
+            )}
+          </View>
+        );
+      }}
+    />
 
-      <ReuseableBottomModal
-        visible={openFilterModal}
-        title="Filter"
-        onClose={() => setOpenFilterModal(false)}
-      >
-        <FileterModal setOpenFilterModal={setOpenFilterModal} />
-      </ReuseableBottomModal>
-    </>
-  );
+    <ReuseableBottomModal
+      visible={openFilterModal}
+      title="Filter"
+      onClose={() => setOpenFilterModal(false)}
+    >
+      <FileterModal setOpenFilterModal={setOpenFilterModal} />
+    </ReuseableBottomModal>
+  </>
+);
 
   return (
     <View style={styles.page}>
@@ -237,7 +271,7 @@ export default function Stations() {
         renderItem={renderStation}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.container}
-        ListHeaderComponent={renderHeader}
+        ListHeaderComponent={listHeader}
         ListEmptyComponent={
           <View style={styles.empty}>
             <MaterialIcons name="local-gas-station" size={50} color="#540863" />

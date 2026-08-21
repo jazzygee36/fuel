@@ -12,6 +12,7 @@ import * as Clipboard from "expo-clipboard";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import BottomModal from "../../../components/bottom-modal";
+import { useCurrentUser } from "../../../hooks/queries/useCurrentUser";
 
 const steps = [
   {
@@ -33,10 +34,17 @@ const steps = [
 ];
 
 export default function ReferralSettings() {
+  const { data: Users } = useCurrentUser();
+
   const [referralHistoryModal, setReferralHistoryModal] = useState(false);
-  const referralCode = "FN67EZYM";
+  const referralCode = Users?.referralCode ?? "";
 
   const handleCopy = async () => {
+    if (!referralCode) {
+      Alert.alert("Error", "Referral code is not available");
+      return;
+    }
+
     await Clipboard.setStringAsync(referralCode);
     Alert.alert("Copied", "Referral code copied successfully");
   };
@@ -102,17 +110,19 @@ export default function ReferralSettings() {
         // description={""}
       >
         <View style={styles.modalContainer}>
-          <View>
+          {/* <View>
             <Text>Total Invites:</Text>
             <Text style={styles.inviteText}>12</Text>
-          </View>
+          </View> */}
           <View>
             <Text>Successful Referrals:</Text>
-            <Text style={styles.inviteText}>12</Text>
+            <Text style={styles.inviteText}>{Users?.referralCount}</Text>
           </View>
           <View>
             <Text>Total Earned:</Text>
-            <Text style={styles.inviteText}>₦80,000</Text>
+            <Text style={styles.inviteText}>
+              ₦{Number(Users?.referralEarnings ?? 0).toLocaleString()}
+            </Text>
           </View>
         </View>
       </BottomModal>

@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
-import { Platform, Text, View, StyleSheet, ActivityIndicator } from "react-native";
-import * as Device from "expo-device";
+import {
+  Text,
+  View,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
 import * as Location from "expo-location";
 import { nearbyStations } from "../api/stations";
-
 
 export default function NearbyStations() {
   const [location, setLocation] =
@@ -11,67 +14,122 @@ export default function NearbyStations() {
 
   const [stations, setStations] = useState<any[]>([]);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function getCurrentLocation() {
+    const getNearbyStations = async () => {
       try {
-        if (Platform.OS === "android" && !Device.isDevice) {
+        setLoading(true);
+        setErrorMsg(null);
+
+        // Check if location services are enabled
+        const servicesEnabled =
+          await Location.hasServicesEnabledAsync();
+
+        console.log(
+          "Location services enabled:",
+          servicesEnabled
+        );
+
+        if (!servicesEnabled) {
           setErrorMsg(
-            "Location will not work on an Android emulator. Try it on a physical device."
+            "Please enable location services on your device."
           );
           return;
         }
 
-        // Request permission
-        const { status } =
-          await Location.requestForegroundPermissionsAsync();
+        // Check existing permission
+        const existingPermission =
+          await Location.getForegroundPermissionsAsync();
 
-        if (status !== "granted") {
-          setErrorMsg("Permission to access location was denied");
+        console.log(
+          "Existing location permission:",
+          existingPermission.status
+        );
+
+        let permissionStatus =
+          existingPermission.status;
+
+        // Request permission if we don't already have it
+        if (permissionStatus !== "granted") {
+          const requestedPermission =
+            await Location.requestForegroundPermissionsAsync();
+
+          permissionStatus =
+            requestedPermission.status;
+
+          console.log(
+            "Location permission:",
+            permissionStatus
+          );
+        }
+
+        if (permissionStatus !== "granted") {
+          setErrorMsg(
+            "Permission to access your location was denied."
+          );
           return;
         }
 
         // Get current location
         const currentLocation =
-          await Location.getCurrentPositionAsync({});
+          await Location.getCurrentPositionAsync({
+            accuracy: Location.Accuracy.Balanced,
+          });
+
+        console.log(
+          "Current location:",
+          currentLocation
+        );
 
         setLocation(currentLocation);
 
-        const latitude = currentLocation.coords.latitude;
-        const longitude = currentLocation.coords.longitude;
+        const {
+          latitude,
+          longitude,
+        } = currentLocation.coords;
 
         console.log("Latitude:", latitude);
         console.log("Longitude:", longitude);
 
-        // Call nearby stations API
-        setLoading(true);
-
+        // Get nearby stations
         const response = await nearbyStations(
           latitude,
           longitude,
           10
         );
 
-        console.log("Nearby stations:", response);
+        console.log(
+          "Nearby stations:",
+          response
+        );
 
         setStations(response);
       } catch (error) {
-        console.error("Failed to get nearby stations:", error);
-        setErrorMsg("Unable to get nearby stations");
+        console.error(
+          "Failed to get nearby stations:",
+          error
+        );
+
+        setErrorMsg(
+          "Unable to get your location or nearby stations."
+        );
       } finally {
         setLoading(false);
       }
-    }
+    };
 
-    getCurrentLocation();
+    getNearbyStations();
   }, []);
 
   if (loading) {
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" />
-        <Text>Finding nearby stations...</Text>
+
+        <Text>
+          Finding nearby stations...
+        </Text>
       </View>
     );
   }
@@ -79,7 +137,9 @@ export default function NearbyStations() {
   if (errorMsg) {
     return (
       <View style={styles.container}>
-        <Text>{errorMsg}</Text>
+        <Text style={styles.errorText}>
+          {errorMsg}
+        </Text>
       </View>
     );
   }
@@ -87,16 +147,26 @@ export default function NearbyStations() {
   return (
     <View style={styles.container}>
       {location && (
-        <>
-          <Text>
-            Latitude: {location.coords.latitude}
+        <View style={styles.locationContainer}>
+          <Text style={styles.title}>
+            Your Location
           </Text>
 
           <Text>
-            Longitude: {location.coords.longitude}
+            Latitude:{" "}
+            {location.coords.latitude}
           </Text>
-        </>
+
+          <Text>
+            Longitude:{" "}
+            {location.coords.longitude}
+          </Text>
+        </View>
       )}
+
+      <Text style={styles.title}>
+        Nearby Stations
+      </Text>
 
       <Text>
         Stations found: {stations.length}
@@ -111,6 +181,21 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     padding: 20,
-    gap: 10,
+    gap: 15,
+  },
+
+  locationContainer: {
+    alignItems: "center",
+    gap: 5,
+  },
+
+  title: {
+    fontSize: 18,
+    fontWeight: "700",
+  },
+
+  errorText: {
+    color: "#EF4444",
+    textAlign: "center",
   },
 });

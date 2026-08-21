@@ -14,6 +14,8 @@ import { RootStackParamList } from "../../../navigation/types";
 import BottomModal from "../../../components/bottom-modal";
 import { useState } from "react";
 import AppButton from "../../../components/button";
+import { useCurrentUser } from "../../../hooks/queries/useCurrentUser";
+import { useLogout } from "../../../hooks/mutations/auth";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -62,8 +64,10 @@ const settingsData = [
 ];
 
 export default function Settings() {
+  const { data: Users } = useCurrentUser();
   const navigation = useNavigation<NavigationProp>();
   const [logoutModal, setLogoutModal] = useState(false);
+  const { mutate: logoutUser, isPending: isLoggingOut } = useLogout();
 
   return (
     <View style={styles.screen}>
@@ -84,21 +88,31 @@ export default function Settings() {
           />
         </View>
 
-        {/* User card */}
         <Pressable
           style={styles.userDetails}
           onPress={() => navigation.navigate("Settings")}
         >
           <View style={styles.userProfile}>
-            <Image
-              source={require("../../../assets/png/avatar.png")}
-              style={styles.avatar}
-              resizeMode="cover"
-            />
+            <View style={styles.avatarContainer}>
+              {Users?.profileImage ? (
+                <Image
+                  source={{ uri: Users.profileImage }}
+                  style={styles.avatar}
+                  resizeMode="cover"
+                />
+              ) : (
+                <Text style={styles.avatarText}>
+                  {Users?.firstName?.charAt(0) || "U"}
+                </Text>
+              )}
+            </View>
 
             <View>
-              <Text style={styles.userName}>Smart Joseph</Text>
-              <Text style={styles.desc}>Individual</Text>
+              <Text style={styles.userName}>
+                {`${Users?.firstName ?? ""} ${Users?.lastName ?? ""}`}
+              </Text>
+
+              <Text style={styles.desc}>{Users?.accountType}</Text>
             </View>
           </View>
 
@@ -158,16 +172,24 @@ export default function Settings() {
       >
         <View style={{ gap: 20 }}>
           <AppButton
+            title={isLoggingOut ? "Logging out..." : "Logout"}
+            backgroundColor="#540863"
+            disabled={isLoggingOut}
+            onPress={() => {
+              logoutUser(undefined, {
+                onSuccess: () => {
+                  setLogoutModal(false);
+                },
+                onError: (error) => {
+                  console.log("Logout failed:", error);
+                },
+              });
+            }}
+          />
+          <AppButton
             title={"Cancel"}
             variant="outlined"
             onPress={() => setLogoutModal(false)}
-          />
-          <AppButton
-            title={"Logout"}
-            backgroundColor="#540863"
-            onPress={() => {
-              (setLogoutModal(false), navigation.navigate("login"));
-            }}
           />
         </View>
       </BottomModal>
@@ -229,12 +251,26 @@ const styles = StyleSheet.create({
     gap: 12,
   },
 
-  avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+  avatarContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: "#665096",
+    justifyContent: "center",
+    alignItems: "center",
+    overflow: "hidden",
   },
 
+  avatar: {
+    width: "100%",
+    height: "100%",
+  },
+
+  avatarText: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "700",
+  },
   userName: {
     color: "#151521",
     fontSize: 16,

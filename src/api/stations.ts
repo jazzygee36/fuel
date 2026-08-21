@@ -21,5 +21,5 @@ export const nearbyStations = async (
 export const getAllStations = async () => {
   const { data } = await api.get(`/stations`);
 
-  return data;
+  return data.stations;
 };

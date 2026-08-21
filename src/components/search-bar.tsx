@@ -11,31 +11,46 @@ import {
 interface Props {
   searchIcon?: boolean;
   placeholder: string;
+  value?: string;
   onPress?: () => void;
+  onSearch?: (text: string) => void;
 }
 
 export default function SearchBar({
   searchIcon = true,
   placeholder,
+  value = "",
   onPress,
+  onSearch,
 }: Props) {
   return (
     <View style={[styles.flexDiv, styles.searchRow]}>
       <View style={styles.searchInputWrap}>
         <TextInput
+          value={value}
+          onChangeText={onSearch}
           placeholder={placeholder}
           placeholderTextColor="#999"
           style={[
             styles.input,
             Platform.OS === "web"
-              ? ({ outlineStyle: "none", outlineWidth: 0 } as any)
+              ? ({
+                  outlineStyle: "none",
+                  outlineWidth: 0,
+                } as any)
               : null,
           ]}
+          autoCorrect={false}
+          autoCapitalize="none"
         />
       </View>
 
       {searchIcon && (
-        <TouchableOpacity style={styles.searchIconCircle} onPress={onPress}>
+        <TouchableOpacity
+          style={styles.searchIconCircle}
+          onPress={onPress}
+          activeOpacity={0.7}
+        >
           <Image
             source={require("../assets/png/settingIcon.png")}
             resizeMode="contain"
@@ -66,8 +81,6 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     justifyContent: "center",
     paddingHorizontal: 16,
-    borderWidth: 0,
-    borderColor: "transparent",
   },
 
   input: {
@@ -76,7 +89,6 @@ const styles = StyleSheet.create({
     color: "#000",
     paddingVertical: 0,
     borderWidth: 0,
-    borderColor: "transparent",
     backgroundColor: "transparent",
   },
 

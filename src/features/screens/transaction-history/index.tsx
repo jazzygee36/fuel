@@ -10,8 +10,9 @@ import SelectInput from "../../../components/select-input";
 import TransactionItem from "./transaction-items";
 import TransactionView from "./trans-view";
 import { usePurchases } from "../../../hooks/queries/purchases";
+import TransactionsList from "./transaction-items";
 
-const Filtered = ["Successful", "Unsuccessful", "Cancelled", "Progress"];
+const Filtered = ["Successful", "Unsuccessful", "Cancelled", "Pending"];
 
 export default function TransactionHistory() {
   const { data } = usePurchases();
@@ -60,18 +61,18 @@ export default function TransactionHistory() {
             />
 
             {/* Transactions */}
-            <TransactionItem
+            <TransactionsList
               setStep={setStep}
               setSelectionHis={setSelectionHis}
               transactionFilter={transactionFilter}
-              data={data}
+              data={data ?? []}
             />
           </>
         )}
 
         {/* Transaction details */}
         {step === 2 && (
-          <TransactionView setStep={setStep} selectionHis={selectionHis} />
+          <TransactionView setStep={setStep} selectionHistory={selectionHis} />
         )}
       </ScrollView>
 

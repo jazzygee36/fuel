@@ -12,6 +12,7 @@ import TextInputField from "../../../components/textInputField";
 import AppButton from "../../../components/button";
 import { useState } from "react";
 import SettingsHeader from "./header";
+import { useCurrentUser } from "../../../hooks/queries/useCurrentUser";
 
 const data = [
   { id: 1, label: "Driver’s Licence" },
@@ -19,6 +20,8 @@ const data = [
 ];
 
 export default function AccountSettings() {
+  const { data: Users } = useCurrentUser();
+  console.log(Users)
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const handleEdit = () => {
     console.log("Edit profile image clicked");
@@ -44,9 +47,22 @@ export default function AccountSettings() {
           </Pressable>
         </View>
         <View>
-          <TextInputField label="Full name" placeholder="Name" />
-          <TextInputField label=" Email address" placeholder="Email" />
-          <TextInputField label="Phone number" placeholder="Phone number" />
+          <TextInputField
+            label="Full name"
+            placeholder="Name"
+            value={`${Users?.firstName} ${Users?.lastName} `}
+            readOnly
+          />
+          <TextInputField
+            label=" Email address"
+            placeholder="Email"
+            value={`${Users?.email}`}
+          />
+          <TextInputField
+            label="Phone number"
+            placeholder="Phone number"
+            value={`${Users?.phone}`}
+          />
           <AppButton
             title={"Delete Account"}
             backgroundColor="#FFEEF1"

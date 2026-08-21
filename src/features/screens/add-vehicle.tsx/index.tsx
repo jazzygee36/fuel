@@ -19,15 +19,30 @@ import Loading from "../../../components/loading";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../../navigation/types";
 import { useNavigation } from "@react-navigation/native";
+import { useState } from "react";
+import AppToast from "../../../components/toast";
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
-
 
 export default function AddVehicle() {
   const { data: userId } = useCurrentUserId();
   const { mutate, isPending } = useAddVehicles(userId?.id);
-    const navigation = useNavigation<NavigationProp>();
-  
+  const navigation = useNavigation<NavigationProp>();
 
+  const [toast, setToast] = useState({
+    visible: false,
+    message: "",
+    type: "success" as "success" | "error" | "warning" | "info",
+  });
+  const showToast = (
+    message: string,
+    type: "success" | "error" | "warning" | "info" = "success",
+  ) => {
+    setToast({
+      visible: true,
+      message,
+      type,
+    });
+  };
   const {
     control,
     handleSubmit,
@@ -57,9 +72,25 @@ export default function AddVehicle() {
       fuelType: data.fuelType,
       capacity: Number(data.capacity),
     };
+
     mutate(payload, {
       onSuccess: () => {
-        navigation.navigate("VehicleSettings");
+        showToast("Vehicle added successfully!", "success");
+
+        // Give the toast a moment to display before navigating
+        setTimeout(() => {
+          navigation.navigate("VehicleSettings");
+        }, 1500);
+      },
+
+      onError: (error: any) => {
+        console.log("Add vehicle error:", error);
+
+        showToast(
+          error?.response?.data?.message ||
+            "Failed to add vehicle. Please try again.",
+          "error",
+        );
       },
     });
   };
@@ -74,6 +105,17 @@ export default function AddVehicle() {
 
   return (
     <View style={styles.screen}>
+      <AppToast
+        visible={toast.visible}
+        message={toast.message}
+        type={toast.type}
+        onClose={() =>
+          setToast((prev) => ({
+            ...prev,
+            visible: false,
+          }))
+        }
+      />
       <ScrollView
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
@@ -244,5 +286,4 @@ const styles = StyleSheet.create({
     fontFamily: "BricolageGrotesque",
     color: "#151521",
   },
-
 });

@@ -5,23 +5,229 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../../navigation/types";
 import AppButton from "../../../components/button";
+import { MaterialIcons } from "@expo/vector-icons";
+import * as Print from "expo-print";
+import * as Sharing from "expo-sharing";
+import { Alert } from "react-native";
 interface TransProps {
   setStep: React.Dispatch<React.SetStateAction<number>>;
-  selectionHis: any;
+  selectionHistory: any;
 }
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-export default function TransactionView({ setStep, selectionHis }: TransProps) {
+export default function TransactionView({
+  setStep,
+  selectionHistory,
+}: TransProps) {
   const navigation = useNavigation<NavigationProp>();
   const [scanCode, setScanCode] = useState(false);
-  console.log("selectionHis", selectionHis);
+  console.log("selectionHis", selectionHistory);
 
   const barcodeValue = JSON.stringify({
-    userId: "12345",
-    amount: 5000,
-    transactionRef: "FN-908776",
-    fuelType: "Petrol",
+    verificationCode: selectionHistory?.verificationCode,
+    productType: selectionHistory?.productType,
+    quantityLitres: selectionHistory?.quantityLitres,
+    pricePerLitre: selectionHistory?.pricePerLitre,
+    totalAmount: selectionHistory?.totalAmount,
   });
+
+  const handleDownloadReceipt = async () => {
+    if (!selectionHistory) {
+      Alert.alert("Error", "Transaction details are unavailable.");
+      return;
+    }
+
+    try {
+      const transactionDate = selectionHistory?.createdAt
+        ? new Date(selectionHistory.createdAt).toLocaleString("en-US", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+          })
+        : "";
+
+      const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              padding: 30px;
+              color: #151521;
+            }
+
+            .header {
+              text-align: center;
+              margin-bottom: 30px;
+            }
+
+            .title {
+              font-size: 24px;
+              font-weight: bold;
+              margin-bottom: 5px;
+            }
+
+            .subtitle {
+              font-size: 14px;
+              color: #76777A;
+            }
+
+            .token {
+              background: #E8F8F0;
+              padding: 15px;
+              border-radius: 10px;
+              text-align: center;
+              margin-bottom: 25px;
+            }
+
+            .token-label {
+              font-size: 12px;
+              color: #76777A;
+            }
+
+            .token-value {
+              font-size: 22px;
+              font-weight: bold;
+              color: #027A48;
+              margin-top: 5px;
+            }
+
+            .row {
+              display: flex;
+              justify-content: space-between;
+              padding: 14px 0;
+              border-bottom: 1px solid #F0F0F4;
+            }
+
+            .label {
+              color: #76777A;
+              font-size: 13px;
+            }
+
+            .value {
+              font-size: 13px;
+              font-weight: bold;
+            }
+
+            .total {
+              display: flex;
+              justify-content: space-between;
+              padding: 20px 0;
+              font-size: 18px;
+              font-weight: bold;
+            }
+
+            .footer {
+              margin-top: 40px;
+              text-align: center;
+              color: #76777A;
+              font-size: 12px;
+            }
+          </style>
+        </head>
+
+        <body>
+
+          <div class="header">
+            <div class="title">FuelNetix</div>
+            <div class="subtitle">Transaction Receipt</div>
+          </div>
+
+          <div class="token">
+            <div class="token-label">Transaction Token</div>
+            <div class="token-value">
+              ${selectionHistory?.verificationCode ?? "-"}
+            </div>
+          </div>
+
+          <div class="row">
+            <span class="label">Fuel Type</span>
+            <span class="value">
+              ${selectionHistory?.productType ?? "-"}
+            </span>
+          </div>
+
+          <div class="row">
+            <span class="label">Amount per litre</span>
+            <span class="value">
+              ₦${Number(
+                selectionHistory?.pricePerLitre ?? 0,
+              ).toLocaleString()}/L
+            </span>
+          </div>
+
+          <div class="row">
+            <span class="label">Quantity</span>
+            <span class="value">
+              ${selectionHistory?.quantityLitres ?? 0} Litres
+            </span>
+          </div>
+
+          <div class="row">
+            <span class="label">Transaction Date</span>
+            <span class="value">
+              ${transactionDate}
+            </span>
+          </div>
+
+          <div class="row">
+            <span class="label">Payment Method</span>
+            <span class="value">
+              ${selectionHistory?.paymentSource ?? "-"}
+            </span>
+          </div>
+
+          <div class="row">
+            <span class="label">Transaction Status</span>
+            <span class="value">
+              ${selectionHistory?.status ?? "-"}
+            </span>
+          </div>
+
+          <div class="total">
+            <span>Total Amount</span>
+            <span>
+              ₦${Number(selectionHistory?.totalAmount ?? 0).toLocaleString()}
+            </span>
+          </div>
+
+          <div class="footer">
+            Thank you for using FuelNetix.
+          </div>
+
+        </body>
+      </html>
+    `;
+
+      const { uri } = await Print.printToFileAsync({
+        html,
+      });
+
+      const canShare = await Sharing.isAvailableAsync();
+
+      if (canShare) {
+        await Sharing.shareAsync(uri, {
+          mimeType: "application/pdf",
+          dialogTitle: "Download receipt",
+          UTI: "com.adobe.pdf",
+        });
+      } else {
+        Alert.alert(
+          "Receipt generated",
+          "Your receipt has been generated successfully.",
+        );
+      }
+    } catch (error) {
+      console.error("Receipt generation error:", error);
+
+      Alert.alert("Error", "Unable to generate the receipt. Please try again.");
+    }
+  };
 
   return (
     <View>
@@ -42,36 +248,84 @@ export default function TransactionView({ setStep, selectionHis }: TransProps) {
         </View>
       </View>
       <View style={{ marginVertical: 30, gap: 20 }}>
-        <Image source={require("../../../assets/png/trans-logo.png")} />
+        {selectionHistory?.logo ? (
+          <Image source={{ uri: selectionHistory.logo }} style={styles.logo} />
+        ) : (
+          <View style={styles.ReceiptHeader}>
+            <View style={styles.logoPlaceholder}>
+              <MaterialIcons
+                name="local-gas-station"
+                size={25}
+                color="#540863"
+              />
+            </View>
+            <Text>{selectionHistory?.productType}</Text>
+          </View>
+        )}
+
         <View style={styles.selectionDetails}>
-          <Text style={styles.textDesc}>Amount per litre</Text>{" "}
-          <Text style={styles.textItems}>{selectionHis?.amount}</Text>
+          <Text style={styles.textDesc}>Token</Text>
+          <Text style={styles.tokenText}>
+            {selectionHistory?.verificationCode}
+          </Text>
         </View>
+
         <View style={styles.selectionDetails}>
-          <Text style={styles.textDesc}>Quantity</Text>{" "}
-          <Text style={styles.textItems}>{selectionHis?.qty}</Text>
+          <Text style={styles.textDesc}>Fuel Type</Text>
+          <Text style={styles.textItems}>{selectionHistory?.productType}</Text>
         </View>
+
         <View style={styles.selectionDetails}>
-          <Text style={styles.textDesc}> Transaction date</Text>{" "}
-          <Text style={styles.textItems}>{selectionHis?.date}</Text>
+          <Text style={styles.textDesc}>Amount per litre</Text>
+          <Text style={styles.textItems}>
+            ₦{Number(selectionHistory?.pricePerLitre ?? 0).toLocaleString()}/L
+          </Text>
         </View>
+
         <View style={styles.selectionDetails}>
-          <Text style={styles.textDesc}> Retail Station</Text>{" "}
-          <Text style={styles.textItems}>{selectionHis?.RetailStation}</Text>
+          <Text style={styles.textDesc}>Quantity</Text>
+          <Text style={styles.textItems}>
+            {selectionHistory?.quantityLitres} Litres
+          </Text>
         </View>
+
         <View style={styles.selectionDetails}>
-          <Text style={styles.textDesc}> Payment method</Text>
-          <Text style={styles.textItems}>{selectionHis?.type}</Text>
+          <Text style={styles.textDesc}>Transaction date</Text>
+          <Text style={styles.textItems}>
+            {selectionHistory?.createdAt
+              ? new Date(selectionHistory.createdAt).toLocaleString("en-US", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                  hour: "numeric",
+                  minute: "2-digit",
+                })
+              : ""}
+          </Text>
         </View>
+
+        <View style={styles.selectionDetails}>
+          <Text style={styles.textDesc}>Payment method</Text>
+          <Text style={styles.textItems}>
+            {selectionHistory?.paymentSource}
+          </Text>
+        </View>
+
         <View style={styles.selectionDetails}>
           <Text style={styles.textDesc}>Transaction status</Text>
-          <Text style={styles.textItems}>{selectionHis?.status}</Text>
+          <Text style={styles.textItems}>{selectionHistory?.status}</Text>
         </View>
-        <hr style={styles.line} />
+
+        <View style={styles.line} />
+
         <View style={styles.selectionDetails}>
-          <Text>Total Amount</Text>
-          <Text style={{ fontWeight: "bold" }}>₦68,000</Text>
+          <Text style={styles.textDesc}>Total Amount</Text>
+
+          <Text style={styles.totalAmount}>
+            ₦{Number(selectionHistory?.totalAmount ?? 0).toLocaleString()}
+          </Text>
         </View>
+
         <Pressable style={styles.scanCode} onPress={() => setScanCode(true)}>
           <Image source={require("../../../assets/png/scan.png")} />
           <Text>Tap to scan code</Text>
@@ -98,7 +352,7 @@ export default function TransactionView({ setStep, selectionHis }: TransProps) {
           title={"Download receipt"}
           backgroundColor="#540863"
           textColor="#fff"
-          // onPress={handleStep}
+          onPress={handleDownloadReceipt}
         />
       </View>
     </View>
@@ -147,16 +401,22 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#000000",
   },
-  line: {
-    color: "#F0F0F4",
-    // borderWidth: 2,
-    width: "100%",
+  tokenText: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#027A48",
   },
   scanCode: {
     flexDirection: "row",
     alignItems: "center",
     gap: 5,
     marginVertical: 20,
+  },
+  ReceiptHeader: {
+    fontWeight: 700,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 20,
   },
   virtualAccount: {
     width: "100%",
@@ -173,7 +433,31 @@ const styles = StyleSheet.create({
     fontSize: 13,
     textAlign: "center",
   },
+  line: {
+    width: "100%",
+    height: 1,
+    backgroundColor: "#F0F0F4",
+  },
+  totalAmount: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#000",
+  },
+  logo: {
+    width: 45,
+    height: 45,
+    resizeMode: "contain",
+  },
 
+  logoPlaceholder: {
+    width: 45,
+    height: 45,
+    borderRadius: 10,
+    backgroundColor: "#F5F2FC",
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+  },
   footer: {
     paddingHorizontal: 20,
     paddingVertical: 16,

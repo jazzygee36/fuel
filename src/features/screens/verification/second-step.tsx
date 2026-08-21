@@ -1,23 +1,42 @@
 import { View, StyleSheet, Image } from "react-native";
 import VerifyHeader from "./verify-header";
+import AppButton from "../../../components/button";
 
-const PasswordImage = [
-  { image: require("../../../assets/png/passport1-cutoff.png") },
-  { image: require("../../../assets/png/password2-blur.png") },
-  { image: require("../../../assets/png/password3-glare.png") },
-  { image: require("../../../assets/png/passwordgood.png") },
+const PassportImage = [
+  {
+    image: require("../../../assets/png/passport1-cutoff.png"),
+  },
+  {
+    image: require("../../../assets/png/password2-blur.png"),
+  },
+  {
+    image: require("../../../assets/png/password3-glare.png"),
+  },
+  {
+    image: require("../../../assets/png/passwordgood.png"),
+  },
 ];
 
-export default function SecondStepVerification() {
+interface Props {
+  documentType: string | null;
+  onNext: () => void;
+  onBack: () => void;
+}
+
+export default function SecondStepVerification({
+  documentType,
+  onNext,
+  onBack,
+}: Props) {
   return (
     <View style={styles.container}>
       <VerifyHeader
-        title={"Mistakes to avoid"}
-        description={"Scans and photocopies are not accepted"}
+        title="Mistakes to avoid"
+        description="Scans and photocopies are not accepted"
       />
 
       <View style={styles.grid}>
-        {PasswordImage.map((pwd, index) => (
+        {PassportImage.map((pwd, index) => (
           <View key={index} style={styles.item}>
             <Image
               source={pwd.image}
@@ -26,6 +45,23 @@ export default function SecondStepVerification() {
             />
           </View>
         ))}
+      </View>
+
+      {/* Buttons */}
+      <View style={styles.footer}>
+        <AppButton
+          title="Continue"
+          backgroundColor="#540863"
+          textColor="#fff"
+          onPress={onNext}
+        />
+
+        <AppButton
+          title="Back"
+          backgroundColor="transparent"
+          textColor="#000"
+          onPress={onBack}
+        />
       </View>
     </View>
   );
@@ -55,5 +91,10 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     height: 120,
+  },
+
+  footer: {
+    marginTop: 20,
+    gap: 5,
   },
 });

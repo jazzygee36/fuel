@@ -17,6 +17,9 @@ type TransactionType = {
   type: "credit" | "debit";
   qty: string;
   RetailStation: string;
+  verificationCode: any;
+  totalAmount: any;
+  createdAt: any;
 };
 
 type Props = {
@@ -25,6 +28,7 @@ type Props = {
 };
 
 function TransactionItem({ data, onPress }: Props) {
+  console.log("dataaaa", data);
   const isSuccess = data.status === "Successful";
 
   return (
@@ -46,8 +50,8 @@ function TransactionItem({ data, onPress }: Props) {
         </View>
 
         <View>
-          <Text style={styles.ref}>{data.ref}</Text>
-          <Text style={styles.amount}>{data.amount}</Text>
+          <Text style={styles.ref}>{data?.verificationCode}</Text>
+          <Text style={styles.amount}>{data?.totalAmount}</Text>
         </View>
       </View>
 
@@ -64,11 +68,21 @@ function TransactionItem({ data, onPress }: Props) {
               isSuccess ? styles.successText : styles.failedText,
             ]}
           >
-            {data.status}
+            {data?.status}
           </Text>
         </View>
 
-        <Text style={styles.date}>{data.date}</Text>
+        <Text style={styles.date}>
+          {data?.createdAt
+            ? new Date(data.createdAt).toLocaleString("en-US", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+                hour: "numeric",
+                minute: "2-digit",
+              })
+            : ""}
+        </Text>
       </View>
 
       <Ionicons name="chevron-forward" size={18} color="#111" />
@@ -82,6 +96,7 @@ export default function TransactionsList({
   transactionFilter,
   data,
 }: TransProps) {
+  console.log("TransProps", data);
   const filteredTransactions =
     transactionFilter === "All transactions"
       ? data

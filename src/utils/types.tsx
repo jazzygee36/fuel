@@ -16,6 +16,21 @@ export interface LoginDto {
   password: string;
 }
 
+export type SignUpDto = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  password: string;
+};
+
+export type VerificationProps = {
+  documentType: string;
+  documentFrontUrl: string;
+  documentBackUrl: string;
+  
+};
+
 export interface VehicleDto {
   registrationNumber: string;
   make: string;
@@ -25,4 +40,16 @@ export interface VehicleDto {
   vin: string;
   fuelType: string;
   capacity: number;
+}
+
+export interface FuelProps {
+  stationId: string;
+  vehicleId: string;
+  productType: string;
+  quantityLitres: number;
+  paymentSource: "WALLET";
+  // cardId: string;
+  // saveCard: true;
+  pricePerLitre: number;
+  totalPrice: number;
 }

@@ -20,7 +20,7 @@ export default function App() {
 
   const [initialState, setInitialState] = useState<
     NavigationState | undefined
-  >();
+  >(undefined);
 
   const [isNavigationReady, setIsNavigationReady] = useState(false);
 
@@ -32,10 +32,20 @@ export default function App() {
         );
 
         if (savedState) {
-          setInitialState(JSON.parse(savedState));
+          const parsedState = JSON.parse(savedState);
+
+          if (parsedState) {
+            setInitialState(parsedState);
+          }
         }
       } catch (error) {
-        console.log("Failed to restore navigation state:", error);
+        console.log(
+          "Failed to restore navigation state:",
+          error
+        );
+
+        // Remove corrupted navigation state
+        await AsyncStorage.removeItem(NAVIGATION_STATE_KEY);
       } finally {
         setIsNavigationReady(true);
       }
@@ -43,6 +53,28 @@ export default function App() {
 
     restoreNavigationState();
   }, []);
+
+  const handleNavigationStateChange = async (
+    state: NavigationState | undefined
+  ) => {
+    try {
+      // Don't save undefined
+      if (!state) {
+        await AsyncStorage.removeItem(NAVIGATION_STATE_KEY);
+        return;
+      }
+
+      await AsyncStorage.setItem(
+        NAVIGATION_STATE_KEY,
+        JSON.stringify(state)
+      );
+    } catch (error) {
+      console.log(
+        "Failed to save navigation state:",
+        error
+      );
+    }
+  };
 
   if (!fontsLoaded || !isNavigationReady) {
     return null;
@@ -53,12 +85,7 @@ export default function App() {
       <AuthProvider>
         <NavigationContainer
           initialState={initialState}
-          onStateChange={(state) => {
-            AsyncStorage.setItem(
-              NAVIGATION_STATE_KEY,
-              JSON.stringify(state)
-            );
-          }}
+          onStateChange={handleNavigationStateChange}
         >
           <RootNavigator />
         </NavigationContainer>

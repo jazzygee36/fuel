@@ -25,7 +25,7 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 export default function VehicleSettings() {
   const { data: userId } = useCurrentUserId();
   const { data: vehicles, isPending } = useVehicles(userId?.id);
-    console.log("deleteVehicle", vehicles);
+    
 
   const [selected, setSelected] = useState("");
   const [openMenuIndex, setOpenMenuIndex] = useState<number | null>(null);
