@@ -25,6 +25,7 @@ export type RootStackParamList = {
   login: undefined;
   register: undefined;
   individual: undefined;
+  corporate: undefined;
   policy: undefined;
   terms: undefined;
   verify: undefined;

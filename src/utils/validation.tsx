@@ -32,6 +32,33 @@ export const signUpSchema = z
 
 export type SignUpForm = z.infer<typeof signUpSchema>;
 
+export const corporateSignUpSchema = z
+  .object({
+    email: z.string().min(1, "Email is required").email("Enter a valid email"),
+
+    businessName: z.string().min(2, "Business name is required"),
+
+    phone: z.string().min(2, "Phone number is required"),
+
+    password: z.string().min(6, "Password must be at least 6 characters"),
+
+    confirmPassword: z
+      .string()
+      .min(6, "Password must be at least 6 characters"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
+export type CorporateSignUpForm = z.infer<typeof corporateSignUpSchema>;
+
+export const forgetPasswordSchema = z.object({
+  email: z.string().min(1, "Email is required").email("Enter a valid email"),
+});
+
+export type ForgetPasswordForm = z.infer<typeof forgetPasswordSchema>;
+
 export const vehicleSchema = z.object({
   registrationNumber: z.string().min(1, "Registration number is required"),
   make: z.string().min(3, "Make is required"),

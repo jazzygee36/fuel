@@ -26,7 +26,7 @@ type TabNavigationProp = BottomTabNavigationProp<AppTabParamList>;
 
 export default function Dashboard() {
   const { data: Users } = useCurrentUser();
-  console.log("Users", Users);
+
   const rootNavigation = useNavigation<RootNavigationProp>();
   const tabNavigation = useNavigation<TabNavigationProp>();
   const [open, setOpen] = useState(false);
@@ -162,9 +162,7 @@ export default function Dashboard() {
           <View>
             <Text style={styles.userName}>
               Hello,
-              <Text style={{ color: "#151521", fontWeight: "700" }}>
-                {Users?.firstName}
-              </Text>
+              <Text style={styles.userNameText}>{Users?.firstName}</Text>
             </Text>
             <Text style={styles.desc}>
               <Entypo name="location-pin" size={12} color="black" />
@@ -184,21 +182,25 @@ export default function Dashboard() {
               resizeMode="cover"
             />
           </Pressable>
-          <View style={styles.circle}>
+          {/* <View style={styles.circle}>
             <Image
               source={require("../../../assets/png/notify.png")}
-              // style={styles.stationImage}
+             
               resizeMode="cover"
             />
-          </View>
+          </View> */}
         </View>
       </View>
-      <SearchBar
-        placeholder="Search name/location"
-        value={searchQuery}
-        onSearch={setSearchQuery}
-        onPress={() => setOpenFilterModal(true)}
-      />
+      <Pressable onPress={() => rootNavigation.navigate("Stations")}>
+        <SearchBar
+          placeholder="Search name/location"
+          value={searchQuery}
+          onSearch={setSearchQuery}
+          onPress={() => {
+            setOpenFilterModal(true);
+          }}
+        />
+      </Pressable>
 
       <View style={{ marginTop: 25 }}>
         <View>
@@ -262,7 +264,13 @@ export default function Dashboard() {
           onPress={() => setVerifyModal(true)}
         >
           <Text style={styles.continueText}>
-            {Users?.isVerified ? "Verified" : "Continue"}
+            {Users?.kycStage === "SELFIE_CAPTURE"
+              ? "Take Selfie"
+              : Users?.kycStage === "REVIEW"
+                ? "Reviewing"
+                : Users?.kycStage === "COMPLETED"
+                  ? "Completed"
+                  : "Continue"}
           </Text>
 
           {!Users?.isVerified && (
@@ -353,6 +361,12 @@ const styles = StyleSheet.create({
     color: "#76777A",
     fontSize: 16,
     fontWeight: "700",
+  },
+
+  userNameText: {
+    color: "#151521",
+    fontWeight: "700",
+    textTransform: "capitalize",
   },
 
   desc: {

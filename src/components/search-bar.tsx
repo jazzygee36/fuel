@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   TextInput,
   Platform,
+  Pressable,
 } from "react-native";
 
 interface Props {
@@ -45,19 +46,21 @@ export default function SearchBar({
         />
       </View>
 
-      {searchIcon && (
-        <TouchableOpacity
-          style={styles.searchIconCircle}
-          onPress={onPress}
-          activeOpacity={0.7}
-        >
-          <Image
-            source={require("../assets/png/settingIcon.png")}
-            resizeMode="contain"
-            style={styles.icon}
-          />
-        </TouchableOpacity>
-      )}
+      {/* <Pressable onPress={() => rootNavigation.navigate('Stations')}> */}
+        {searchIcon && (
+          <TouchableOpacity
+            style={styles.searchIconCircle}
+            onPress={onPress}
+            activeOpacity={0.7}
+          >
+            <Image
+              source={require("../assets/png/settingIcon.png")}
+              resizeMode="contain"
+              style={styles.icon}
+            />
+          </TouchableOpacity>
+        )}
+      {/* </Pressable> */}
     </View>
   );
 }

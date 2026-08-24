@@ -16,7 +16,7 @@ import { useState } from "react";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, "login">;
 
-export default function Individual() {
+export default function Corporate() {
   const navigation = useNavigation<NavigationProp>();
   const { mutate: registerUser, isPending } = useRegistration();
   const {
@@ -59,7 +59,7 @@ export default function Individual() {
       email: data.email,
       phone: data.phone,
       password: data.password,
-      isCorporate: false
+      isCorporate: true
     };
 
     registerUser(payload, {
@@ -110,8 +110,8 @@ export default function Individual() {
             name="firstName"
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInputField
-                label="Enter your firstname"
-                placeholder="First name"
+                label="Business name"
+                placeholder="Business name"
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}

@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { verification } from "../../api/verification";
 
-export const useVerification = () => {
+export const useKycVerification = () => {
   return useMutation({
     mutationFn: verification,
     onSuccess: (data) => {

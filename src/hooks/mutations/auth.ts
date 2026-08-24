@@ -1,5 +1,12 @@
 import { useMutation } from "@tanstack/react-query";
-import { login, logout, register } from "../../api/auth";
+import {
+  forgetPassword,
+  login,
+  logout,
+  register,
+  resetPassword,
+  verifyCode,
+} from "../../api/auth";
 import { useAuth } from "../../providers/AuthProvider";
 import { token } from "../../storage/token";
 
@@ -12,6 +19,24 @@ export const useLogin = () => {
     onSuccess: async (data: Awaited<ReturnType<typeof login>>) => {
       await authenticate(data.access_token);
     },
+  });
+};
+
+export const useForgotPwd = () => {
+  return useMutation({
+    mutationFn: forgetPassword,
+  });
+};
+
+export const useVerifyCode = () => {
+  return useMutation({
+    mutationFn: verifyCode,
+  });
+};
+
+export const useResetPassword = () => {
+  return useMutation({
+    mutationFn: resetPassword,
   });
 };
 

@@ -16,7 +16,10 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useNavigation } from "@react-navigation/native";
 import ReuseableBottomModal from "../../../components/reuseable-bottom-modal";
 import { useVehicles } from "../../../hooks/queries/vehicles";
-import { useCurrentUserId } from "../../../hooks/queries/useCurrentUser";
+import {
+  useCurrentUser,
+  useCurrentUserId,
+} from "../../../hooks/queries/useCurrentUser";
 import { useDeleteVehicle } from "../../../hooks/mutations/vehicles";
 import Loading from "../../../components/loading";
 
@@ -25,19 +28,19 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 export default function VehicleSettings() {
   const { data: userId } = useCurrentUserId();
   const { data: vehicles, isPending } = useVehicles(userId?.id);
-    
+  const { data: Users } = useCurrentUser();
 
+  console.log("vehicles", vehicles);
   const [selected, setSelected] = useState("");
   const [openMenuIndex, setOpenMenuIndex] = useState<number | null>(null);
   const [deleteVehicleModal, setDeleteVehicleModal] = useState(false);
+  const [upgrade, setUpgrade] = useState(false);
 
   const { mutate: deleteVehicle, isPending: isDeleting } = useDeleteVehicle();
-
 
   const navigation = useNavigation<NavigationProp>();
 
   const handleDelete = (vehicleId: string) => {
-
     setSelected(vehicleId);
     setOpenMenuIndex(null);
     setDeleteVehicleModal(true);
@@ -64,6 +67,15 @@ export default function VehicleSettings() {
   }
 
   const hasVehicles = Array.isArray(vehicles) && vehicles.length > 0;
+
+  const handleAddVehicle = () => {
+    if (vehicles?.length >= 3 && Users?.accountType === "INDIVIDUAL") {
+      setUpgrade(true);
+      return;
+    }
+
+    navigation.navigate("AddVehicle");
+  };
 
   return (
     <View style={styles.screen}>
@@ -182,7 +194,7 @@ export default function VehicleSettings() {
             title="Add Vehicle"
             variant="filled"
             backgroundColor="#540863"
-            onPress={() => navigation.navigate("AddVehicle")}
+            onPress={handleAddVehicle}
           />
         )}
       </ScrollView>
@@ -210,6 +222,15 @@ export default function VehicleSettings() {
             onPress={handleConfirmDelete}
           />
         </View>
+      </ReuseableBottomModal>
+
+      <ReuseableBottomModal
+        visible={upgrade}
+        title="Upgrade"
+        onClose={() => setUpgrade(false)}
+        description="Upgrade"
+      >
+        'upgrade to corporate'
       </ReuseableBottomModal>
     </View>
   );

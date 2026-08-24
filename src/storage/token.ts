@@ -6,7 +6,7 @@ const ACCESS_TOKEN_KEY = "access_token";
 const REFRESH_TOKEN_KEY = "refresh_token";
 
 const storage = {
-  async getItem(key: string) {
+  async getItem(key: string): Promise<string | null> {
     if (Platform.OS === "web") {
       return AsyncStorage.getItem(key);
     }
@@ -14,24 +14,27 @@ const storage = {
     return SecureStore.getItemAsync(key);
   },
 
-  async setItem(key: string, value: string) {
+  async setItem(key: string, value: string): Promise<void> {
     if (Platform.OS === "web") {
-      return AsyncStorage.setItem(key, value);
+      await AsyncStorage.setItem(key, value);
+      return;
     }
 
-    return SecureStore.setItemAsync(key, value);
+    await SecureStore.setItemAsync(key, value);
   },
 
-  async removeItem(key: string) {
+  async removeItem(key: string): Promise<void> {
     if (Platform.OS === "web") {
-      return AsyncStorage.removeItem(key);
+      await AsyncStorage.removeItem(key);
+      return;
     }
 
-    return SecureStore.deleteItemAsync(key);
+    await SecureStore.deleteItemAsync(key);
   },
 };
 
 export const token = {
+  // Access token
   async getAccessToken() {
     return storage.getItem(ACCESS_TOKEN_KEY);
   },
@@ -44,6 +47,7 @@ export const token = {
     return storage.removeItem(ACCESS_TOKEN_KEY);
   },
 
+  // Refresh token
   async getRefreshToken() {
     return storage.getItem(REFRESH_TOKEN_KEY);
   },
@@ -56,8 +60,11 @@ export const token = {
     return storage.removeItem(REFRESH_TOKEN_KEY);
   },
 
+  // Clear everything
   async clearTokens() {
-    await storage.removeItem(ACCESS_TOKEN_KEY);
-    await storage.removeItem(REFRESH_TOKEN_KEY);
+    await Promise.all([
+      storage.removeItem(ACCESS_TOKEN_KEY),
+      storage.removeItem(REFRESH_TOKEN_KEY),
+    ]);
   },
 };

@@ -1,13 +1,19 @@
 import { View, StyleSheet, Image, Text, Alert } from "react-native";
 import VerifyHeader from "./verify-header";
 import AppButton from "../../../components/button";
-import { useVerification } from "../../../hooks/mutations/verification";
+
+import { useFilesUploadUrl } from "../../../hooks/mutations/upload";
+import axios from "axios";
+import { useKycVerification } from "../../../hooks/mutations/verification";
+import Loading from "../../../components/loading";
+import { useState } from "react";
+import AppToast from "../../../components/toast";
+import { useNavigation } from "@react-navigation/native";
 
 interface Props {
   documentType?: string | null;
   frontImage?: string | null;
   backImage?: string | null;
- 
   onNext?: () => void;
   onBack?: () => void;
   onCancel?: () => void;
@@ -17,101 +23,191 @@ export default function FifthStepVerification({
   documentType,
   frontImage,
   backImage,
-  onNext,
-  
 }: Props) {
-  const { mutate, isPending } = useVerification();
+  const navigation = useNavigation<any>();
 
-  const handleSubmit = () => {
+  const { mutateAsync: getUploadUrl } = useFilesUploadUrl();
+  const { mutateAsync: verifyKyc } = useKycVerification();
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [toast, setToast] = useState({
+    visible: false,
+    message: "",
+    type: "success" as "success" | "error" | "warning" | "info",
+  });
+
+  const showToast = (
+    message: string,
+    type: "success" | "error" | "warning" | "info" = "success",
+  ) => {
+    setToast({
+      visible: true,
+      message,
+      type,
+    });
+  };
+
+  const documentName =
+    documentType === "drivers-license"
+      ? "Driver's license"
+      : "Passport";
+
+  const baseFileName = documentName
+    .toLowerCase()
+    .replace(/\s+/g, "-");
+
+  const uploadImage = async (
+    imageUri: string,
+    side: "front" | "back",
+  ) => {
+    const response = await fetch(imageUri);
+    const file = await response.blob();
+
+    const uploadData = await getUploadUrl({
+      purpose: "kyc_document",
+      fileName: `${baseFileName}-${side}.jpg`,
+      contentType: "image/jpeg",
+    });
+
+    await axios.put(uploadData.uploadUrl, file, {
+      headers: uploadData.headers,
+    });
+
+    return uploadData.key;
+  };
+
+  const handleSubmit = async () => {
     if (!frontImage || !backImage) {
       Alert.alert(
-        "Passport required",
-        "Please upload both the front and back of your passport.",
+        "Missing documents",
+        "Please provide both the front and back images.",
       );
       return;
     }
 
-    const payload = {
-      documentType,
-      documentFrontUrl: frontImage,
-      documentBackUrl: backImage,
-     
-    };
+    try {
+      setIsSubmitting(true);
 
-    console.log("Verification payload:", payload);
+      // 1. Upload FRONT
+      const documentFrontKey = await uploadImage(
+        frontImage,
+        "front",
+      );
 
-    mutate(payload, {
-      onSuccess: (data) => {
-        console.log("Verification successful:", data);
+      console.log("Front uploaded:", documentFrontKey);
 
-        Alert.alert(
-          "Verification submitted",
-          "Your passport has been submitted successfully.",
-          [
-            {
-              text: "OK",
-              onPress: () => {
-                onNext?.();
-              },
-            },
-          ],
-        );
-      },
+      // 2. Upload BACK
+      const documentBackKey = await uploadImage(
+        backImage,
+        "back",
+      );
 
-      onError: (error: any) => {
-        console.log("Verification error:", error?.response?.data || error);
+      console.log("Back uploaded:", documentBackKey);
 
-        Alert.alert(
-          "Verification failed",
-          error?.response?.data?.message ||
-            "Unable to submit your verification. Please try again.",
-        );
-      },
-    });
+      // 3. Prepare KYC payload
+      const payload = {
+        documentType:
+          documentType === "drivers-license"
+            ? "DRIVERS_LICENSE"
+            : "PASSPORT",
+
+        documentFrontKey,
+        documentBackKey,
+      };
+
+      console.log("KYC payload:", payload);
+
+      // 4. Submit KYC
+      await verifyKyc(payload);
+
+      // 5. Show success toast
+      showToast(
+        "Your verification was submitted successfully.",
+        "success",
+      );
+
+      // 6. Give toast time to display, then navigate
+      setTimeout(() => {
+        navigation.navigate("app", {
+          screen: "Dashboard",
+        });
+      }, 1500);
+    } catch (error: any) {
+      console.error(
+        "KYC verification failed:",
+        error?.response?.data || error,
+      );
+
+      showToast(
+        error?.response?.data?.message ||
+          "Unable to submit your verification. Please try again.",
+        "error",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <View style={styles.container}>
+      <AppToast
+        visible={toast.visible}
+        message={toast.message}
+        type={toast.type}
+        onClose={() =>
+          setToast((prev) => ({
+            ...prev,
+            visible: false,
+          }))
+        }
+      />
+
       <VerifyHeader
-        title="Passport View"
-        description="Review your passport before submitting"
+        title={`${documentName} View`}
+        description={`Review your ${documentName.toLowerCase()} before submitting`}
       />
 
       <View style={styles.imagesContainer}>
-        {/* FRONT */}
         {frontImage && (
           <View style={styles.imageWrapper}>
-            <Text style={styles.label}>Front of passport</Text>
+            <Text style={styles.label}>
+              Front of {documentName.toLowerCase()}
+            </Text>
 
             <Image
               source={{ uri: frontImage }}
-              style={styles.passportImage}
+              style={styles.documentImage}
               resizeMode="contain"
             />
           </View>
         )}
 
-        {/* BACK */}
         {backImage && (
           <View style={styles.imageWrapper}>
-            <Text style={styles.label}>Back of passport</Text>
+            <Text style={styles.label}>
+              Back of {documentName.toLowerCase()}
+            </Text>
 
             <Image
               source={{ uri: backImage }}
-              style={styles.passportImage}
+              style={styles.documentImage}
               resizeMode="contain"
             />
           </View>
         )}
       </View>
 
-      {/* BUTTON */}
       <View style={styles.footer}>
         <AppButton
-          title={isPending ? "Submitting..." : "Continue"}
+          title={isSubmitting ? <Loading /> : "Continue"}
           backgroundColor="#540863"
           textColor="#fff"
-          disabled={!frontImage || !backImage || isPending}
+          disabled={
+            !frontImage ||
+            !backImage ||
+            isSubmitting
+          }
           onPress={handleSubmit}
         />
       </View>
@@ -142,7 +238,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 
-  passportImage: {
+  documentImage: {
     width: "100%",
     height: 180,
     borderRadius: 10,

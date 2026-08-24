@@ -33,7 +33,7 @@ export default function Verification() {
   const [step, setStep] = useState(1);
 
   const [selectedDocument, setSelectedDocument] = useState<string | null>(null);
-  console.log('selectedDocument', selectedDocument)
+  console.log("selectedDocument", selectedDocument);
   const [frontImage, setFrontImage] = useState<string | null>(null);
   const [backImage, setBackImage] = useState<string | null>(null);
 
@@ -73,9 +73,6 @@ export default function Verification() {
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
       >
-        {/* =================================
-            STEP 1 - SELECT DOCUMENT
-        ================================== */}
         {step === 1 && (
           <View>
             <VerifyHeader

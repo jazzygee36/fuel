@@ -4,10 +4,11 @@ import {
   useEffect,
   useState,
   ReactNode,
+  useCallback,
 } from "react";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { logout as logoutApi } from "../api/auth";
+import { authEvents, logout as logoutApi } from "../api/auth";
 
 import { token } from "../storage/token";
 import { useCurrentUser } from "../hooks/queries/useCurrentUser";
@@ -27,13 +28,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const [hasToken, setHasToken] = useState<boolean | null>(null);
 
-  const {
-    data: user,
-    isLoading: userLoading,
-    isError,
-    error,
-  } = useCurrentUser(hasToken === true);
+  const { data: user, isLoading: userLoading } = useCurrentUser(
+    hasToken === true,
+  );
 
+  // Check if a token already exists when the app starts
   useEffect(() => {
     const checkToken = async () => {
       try {
@@ -48,6 +47,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     checkToken();
   }, []);
 
+  // LOGIN
   const login = async (accessToken: string) => {
     console.log("LOGIN TOKEN:", accessToken);
 
@@ -55,43 +55,46 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const savedToken = await token.getAccessToken();
 
-    console.log("TOKEN AFTER SAVING:", savedToken);
-
     setHasToken(true);
 
-    // Make sure /me runs after the token has been stored
     await queryClient.invalidateQueries({
       queryKey: ["me"],
     });
   };
 
-  const logout = async () => {
-    console.log("LOGOUT CALLED");
-
+  const logout = useCallback(async () => {
     try {
       await logoutApi();
     } catch (error) {
       console.log("Logout API failed:", error);
     } finally {
-      // Always clear the local session
+      // Always clear local authentication
       await token.clearTokens();
 
+      // Remove cached user
       queryClient.removeQueries({
         queryKey: ["me"],
       });
 
+      // Update authentication state
       setHasToken(false);
     }
-  };
+  }, [queryClient]);
 
+  // Handle forced logout from Axios interceptor
   useEffect(() => {
-    console.log({
-      hasToken,
-      isError,
-      error,
-      user,
+    const unsubscribe = authEvents.setLogoutListener(() => {
+      token.clearTokens().then(() => {
+        queryClient.removeQueries({
+          queryKey: ["me"],
+        });
+
+        setHasToken(false);
+      });
     });
-  }, [hasToken, isError, error, user]);
+
+    return unsubscribe;
+  }, [queryClient]);
 
   return (
     <AuthContext.Provider

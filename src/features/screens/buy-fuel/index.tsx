@@ -15,15 +15,20 @@ import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { RootStackParamList } from "../../../navigation/types";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import AppButton from "../../../components/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ReuseableBottomModal from "../../../components/reuseable-bottom-modal";
-import { useCurrentUserId } from "../../../hooks/queries/useCurrentUser";
+import {
+  useCurrentUser,
+  useCurrentUserId,
+} from "../../../hooks/queries/useCurrentUser";
 import { useVehicles } from "../../../hooks/queries/vehicles";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { styles } from "./styles";
 import { usePurchasePayment } from "../../../hooks/mutations/purchases";
 import { FuelProps } from "../../../utils/types";
 import AppToast from "../../../components/toast";
+import { usePurchases } from "../../../hooks/queries/purchases";
+import Loading from "../../../components/loading";
 
 type BuyFuelRouteProp = RouteProp<RootStackParamList, "BuyFuel">;
 
@@ -39,6 +44,9 @@ export default function BuyFuel() {
 
   const route = useRoute<BuyFuelRouteProp>();
   const { selectedStation } = route.params;
+  const { data: Users } = useCurrentUser();
+  const { data: purchaseHistory } = usePurchases();
+  console.log("purchaseHistory", purchaseHistory);
   const { data: userId } = useCurrentUserId();
   const { data: vehicles, isPending } = useVehicles(userId?.id);
   const { mutate: purchasePayment, isPending: isPurchasing } =
@@ -70,6 +78,8 @@ export default function BuyFuel() {
     : [];
 
   const [selectedVehicle, setSelectedVehicle] = useState<string | null>(null);
+  const [shouldNavigateAfterToast, setShouldNavigateAfterToast] =
+    useState(false);
   const [fuelDetails, setFuelDetails] = useState(false);
   const isCurrentlyOpen = (hours?: unknown) => {
     if (typeof hours !== "string" || !hours) return false;
@@ -133,10 +143,7 @@ export default function BuyFuel() {
       pricePerLitre: buying.pricePerLitre,
       paymentSource: "WALLET",
       totalPrice,
-      
     };
-
-    console.log("Purchase payload:", payload);
 
     purchasePayment(payload, {
       onSuccess: (data) => {
@@ -148,6 +155,9 @@ export default function BuyFuel() {
           "Payment successful! Your fuel purchase has been confirmed.",
           "success",
         );
+        setTimeout(() => {
+          navigation.navigate("TransactionHistory");
+        }, 1000);
       },
 
       onError: (error: any) => {
@@ -160,6 +170,18 @@ export default function BuyFuel() {
       },
     });
   };
+
+  useEffect(() => {
+    if (shouldNavigateAfterToast && toast.visible) {
+      const timer = setTimeout(() => {
+        navigation.navigate("app", {
+          screen: "Dashboard",
+        } as never);
+      }, 1500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [shouldNavigateAfterToast, toast.visible]);
 
   return (
     <View style={styles.screen}>
@@ -364,13 +386,24 @@ export default function BuyFuel() {
             {/* BOTTOM BUTTON */}
             <View style={{ width: "100%" }}>
               <AppButton
-                title="Purchase"
+                title="Purchase bbb"
                 variant="filled"
                 backgroundColor="#540863"
                 onPress={() => {
-                  console.log("Fuel:", buying);
-                  console.log("Quantity:", quantity);
-                  console.log("Total price:", totalPrice);
+                  if (
+                    purchaseHistory?.length === 2 &&
+                    Users?.kycStage !== "COMPLETED"
+                  ) {
+                    showToast(
+                      "Please complete your KYC verification to continue.",
+                      "warning",
+                    );
+
+                    setShouldNavigateAfterToast(true);
+
+                    return;
+                  }
+
                   setAddVehicle(true);
                 }}
               />
@@ -465,7 +498,7 @@ export default function BuyFuel() {
         </View>
         <View style={{ width: "100%", marginTop: 10 }}>
           <AppButton
-            title={isPurchasing ? "Processing..." : "Make payment"}
+            title={isPurchasing ? <Loading /> : "Make payment"}
             variant="filled"
             backgroundColor="#540863"
             onPress={handlePayment}

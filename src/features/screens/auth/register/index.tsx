@@ -20,13 +20,13 @@ const account = [
     path: "individual",
     image: require("../../../../assets/png/signup-user.png"),
   },
-  // {
-  //   title: "Corporate",
-  //   desc: "For managing company vehicles and fuel expenses",
-  //   color: "#CAE0ED",
-  //   path: "corporate",
-  //   image: require("../../../../assets/png/signup-shop.png"),
-  // },
+  {
+    title: "Corporate",
+    desc: "For managing company vehicles and fuel expenses",
+    color: "#CAE0ED",
+    path: "corporate",
+    image: require("../../../../assets/png/signup-shop.png"),
+  },
  
 ];
 

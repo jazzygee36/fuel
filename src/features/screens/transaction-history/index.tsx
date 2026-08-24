@@ -11,11 +11,12 @@ import TransactionItem from "./transaction-items";
 import TransactionView from "./trans-view";
 import { usePurchases } from "../../../hooks/queries/purchases";
 import TransactionsList from "./transaction-items";
+import Loading from "../../../components/loading";
 
 const Filtered = ["Successful", "Unsuccessful", "Cancelled", "Pending"];
 
 export default function TransactionHistory() {
-  const { data } = usePurchases();
+  const { data, isPending, isFetching } = usePurchases();
   console.log("purchase", data);
   const [openFilterModal, setOpenFilterModal] = useState(false);
 
@@ -25,6 +26,10 @@ export default function TransactionHistory() {
 
   const [transactionFilter, setTransactionFilter] =
     useState("All transactions");
+
+  if (isPending || isFetching) {
+    <Loading />;
+  }
 
   return (
     <View style={styles.screen}>

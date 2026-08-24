@@ -19,6 +19,7 @@ import VehicleSettings from "../features/screens/settings/my-vehicle";
 import Verification from "../features/screens/verification";
 import AddVehicle from "../features/screens/add-vehicle.tsx";
 import Settings from "../features/screens/settings";
+import Corporate from "../features/screens/auth/register/corporate";
 
 // import AddVehicle from "../features/screens/add-vehicle";
 
@@ -52,6 +53,7 @@ export default function RootNavigator() {
           <Stack.Screen name="forgot" component={ForgotPassword} />
           <Stack.Screen name="newpassword" component={NewPassword} />
           <Stack.Screen name="individual" component={Individual} />
+          <Stack.Screen name="corporate" component={Corporate} />
           <Stack.Screen name="policy" component={Policy} />
           <Stack.Screen name="terms" component={Terms} />
         </>

@@ -51,7 +51,9 @@ function TransactionItem({ data, onPress }: Props) {
 
         <View>
           <Text style={styles.ref}>{data?.verificationCode}</Text>
-          <Text style={styles.amount}>{data?.totalAmount}</Text>
+          <Text style={styles.amount}>
+            ₦{data?.totalAmount?.toLocaleString("en-NG")}
+          </Text>
         </View>
       </View>
 
@@ -132,7 +134,6 @@ export default function TransactionsList({
           key={item.ref}
           data={item}
           onPress={() => {
-            console.log(item);
             setStep(2);
             setSelectionHis(item);
           }}
