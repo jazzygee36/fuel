@@ -41,6 +41,7 @@ export type RootStackParamList = {
   Settings: undefined;
   Wallet: undefined;
   Dashboard: undefined;
+  SelfieVerification:undefined;
 
   BuyFuel: {
     selectedStation: Station;

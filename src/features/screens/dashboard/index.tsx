@@ -261,7 +261,13 @@ export default function Dashboard() {
             Users?.isVerified && styles.verifiedButton,
           ]}
           disabled={Users?.isVerified}
-          onPress={() => setVerifyModal(true)}
+          onPress={() => {
+            if (Users?.kycStage === "SELFIE_CAPTURE") {
+              rootNavigation.navigate("SelfieVerification");
+            } else {
+              setVerifyModal(true);
+            }
+          }}
         >
           <Text style={styles.continueText}>
             {Users?.kycStage === "SELFIE_CAPTURE"

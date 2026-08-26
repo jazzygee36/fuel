@@ -270,11 +270,14 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 20,
     fontWeight: "700",
+    textTransform:'uppercase'
   },
   userName: {
     color: "#151521",
     fontSize: 16,
     fontWeight: "700",
+    textTransform:'capitalize'
+
   },
 
   desc: {

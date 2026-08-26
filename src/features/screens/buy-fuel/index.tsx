@@ -386,7 +386,7 @@ export default function BuyFuel() {
             {/* BOTTOM BUTTON */}
             <View style={{ width: "100%" }}>
               <AppButton
-                title="Purchase bbb"
+                title="Purchase"
                 variant="filled"
                 backgroundColor="#540863"
                 onPress={() => {

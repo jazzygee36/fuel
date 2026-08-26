@@ -20,6 +20,7 @@ import Verification from "../features/screens/verification";
 import AddVehicle from "../features/screens/add-vehicle.tsx";
 import Settings from "../features/screens/settings";
 import Corporate from "../features/screens/auth/register/corporate";
+import SelfieVerification from "../features/screens/verification/selfie";
 
 // import AddVehicle from "../features/screens/add-vehicle";
 
@@ -60,6 +61,8 @@ export default function RootNavigator() {
       ) : (
         <>
           <Stack.Screen name="app" component={AppTabs} />
+          <Stack.Screen name="SelfieVerification" component={SelfieVerification} />
+
           <Stack.Screen name="Verification" component={Verification} />
           <Stack.Screen
             name="TransactionHistory"
