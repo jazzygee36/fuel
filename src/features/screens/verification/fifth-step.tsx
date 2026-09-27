@@ -49,18 +49,11 @@ export default function FifthStepVerification({
   };
 
   const documentName =
-    documentType === "drivers-license"
-      ? "Driver's license"
-      : "Passport";
+    documentType === "drivers-license" ? "Driver's license" : "Passport";
 
-  const baseFileName = documentName
-    .toLowerCase()
-    .replace(/\s+/g, "-");
+  const baseFileName = documentName.toLowerCase().replace(/\s+/g, "-");
 
-  const uploadImage = async (
-    imageUri: string,
-    side: "front" | "back",
-  ) => {
+  const uploadImage = async (imageUri: string, side: "front" | "back") => {
     const response = await fetch(imageUri);
     const file = await response.blob();
 
@@ -90,27 +83,19 @@ export default function FifthStepVerification({
       setIsSubmitting(true);
 
       // 1. Upload FRONT
-      const documentFrontKey = await uploadImage(
-        frontImage,
-        "front",
-      );
+      const documentFrontKey = await uploadImage(frontImage, "front");
 
       console.log("Front uploaded:", documentFrontKey);
 
       // 2. Upload BACK
-      const documentBackKey = await uploadImage(
-        backImage,
-        "back",
-      );
+      const documentBackKey = await uploadImage(backImage, "back");
 
       console.log("Back uploaded:", documentBackKey);
 
       // 3. Prepare KYC payload
       const payload = {
         documentType:
-          documentType === "drivers-license"
-            ? "DRIVERS_LICENSE"
-            : "PASSPORT",
+          documentType === "drivers-license" ? "DRIVERS_LICENSE" : "PASSPORT",
 
         documentFrontKey,
         documentBackKey,
@@ -122,10 +107,7 @@ export default function FifthStepVerification({
       await verifyKyc(payload);
 
       // 5. Show success toast
-      showToast(
-        "Your verification was submitted successfully.",
-        "success",
-      );
+      showToast("Your verification was submitted successfully.", "success");
 
       // 6. Give toast time to display, then navigate
       setTimeout(() => {
@@ -134,10 +116,7 @@ export default function FifthStepVerification({
         });
       }, 1500);
     } catch (error: any) {
-      console.error(
-        "KYC verification failed:",
-        error?.response?.data || error,
-      );
+      console.error("KYC verification failed:", error?.response?.data || error);
 
       showToast(
         error?.response?.data?.message ||
@@ -203,11 +182,7 @@ export default function FifthStepVerification({
           title={isSubmitting ? <Loading /> : "Continue"}
           backgroundColor="#540863"
           textColor="#fff"
-          disabled={
-            !frontImage ||
-            !backImage ||
-            isSubmitting
-          }
+          disabled={!frontImage || !backImage || isSubmitting}
           onPress={handleSubmit}
         />
       </View>

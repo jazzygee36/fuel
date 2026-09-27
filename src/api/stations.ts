@@ -1,3 +1,4 @@
+import { AllStationsParams } from "../hooks/queries/stations";
 import api from "./axios";
 
 export const nearbyStations = async (
@@ -18,8 +19,12 @@ export const nearbyStations = async (
   return data;
 };
 
-export const getAllStations = async () => {
-  const { data } = await api.get(`/stations`);
+export const getAllStations = async (
+  params: AllStationsParams = {}
+) => {
+  const response = await api.get("/stations", {
+    params,
+  });
 
-  return data.stations;
+  return response.data;
 };

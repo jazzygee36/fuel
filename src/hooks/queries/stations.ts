@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { getAllStations, nearbyStations } from "../../api/stations";
 
 export const useNearbyStations = (lat?: number, lng?: number) => {
@@ -9,11 +9,21 @@ export const useNearbyStations = (lat?: number, lng?: number) => {
   });
 };
 
-export const useAllStations = (enabled = true) => {
+export type AllStationsParams = {
+  search?: string;
+  fuelType?: string;
+  page?: number;
+  limit?: number;
+};
+
+export const useAllStations = (params: AllStationsParams = {}) => {
   return useQuery({
-    queryKey: ["stations"],
-    queryFn:  getAllStations,
-    enabled,
-    retry: false,
+    queryKey: ["stations", params],
+    queryFn: () => getAllStations(params),
+
+    // Keep page 1 visible while page 2 is being fetched
+    placeholderData: keepPreviousData,
+
+    staleTime: 30 * 1000,
   });
 };

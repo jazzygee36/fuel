@@ -6,7 +6,6 @@ import {
   Text,
   TouchableOpacity,
   FlatList,
-  ActivityIndicator,
 } from "react-native";
 import SearchBar from "../../../components/search-bar";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -23,59 +22,59 @@ const fuelTabs = ["Petrol", "Diesel", "Gas", "Kerosene"];
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
+const FUEL_TYPE_MAP: Record<string, string> = {
+  Petrol: "petrol",
+  Diesel: "diesel",
+  Gas: "gas",
+  Kerosene: "kerosene",
+};
+
 export default function Stations() {
   const navigation = useNavigation<NavigationProp>();
-  const [searchQuery, setSearchQuery] = useState("");
-  const { data: stationsResponse, isPending } = useAllStations();
-  console.log("stationsResponse", stationsResponse);
 
+  const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("Petrol");
   const [openFilterModal, setOpenFilterModal] = useState(false);
-
   const [currentPage, setCurrentPage] = useState(1);
+  
 
-  const stationsPerPage = 10;
+  const stationsPerPage = 20;
 
+  /**
+   * The backend handles:
+   * - search
+   * - fuelType
+   * - page
+   * - limit
+   */
+  const {
+    data: stationsResponse,
+    isPending,
+    isFetching,
+  } = useAllStations({
+    search: searchQuery.trim() || undefined,
+    fuelType: FUEL_TYPE_MAP[activeTab],
+    page: currentPage,
+    limit: stationsPerPage,
+  });
+
+  console.log("stationsResponse", stationsResponse);
+
+  /**
+   * The API already returns the stations for the requested
+   * page/filter/search, so DON'T filter or slice again here.
+   */
   const stations = Array.isArray(stationsResponse)
     ? stationsResponse
     : (stationsResponse?.stations ?? []);
-  console.log("stations", stations);
-  const filteredStations = stations.filter((station: any) => {
-    const hasFuelType = station?.products?.some(
-      (product: any) =>
-        product?.type?.toLowerCase() === activeTab.toLowerCase(),
-    );
 
-    if (!hasFuelType) return false;
+  const totalStations = stationsResponse?.pagination?.total ?? 0;
 
-    const search = searchQuery.trim().toLowerCase();
+  const apiPage = stationsResponse?.pagination?.page ?? currentPage;
 
-    if (!search) return true;
+  const apiLimit = stationsResponse?.pagination?.limit ?? stationsPerPage;
 
-    const searchableText = [
-      station?.name,
-      station?.address,
-      station?.city,
-      station?.state,
-      station?.location?.address,
-      station?.location?.city,
-      station?.location?.state,
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .toLowerCase();
-
-    return searchableText.includes(search);
-  });
-
-  const totalPages = Math.ceil(filteredStations.length / stationsPerPage);
-
-  const startIndex = (currentPage - 1) * stationsPerPage;
-
-  const paginatedStations = filteredStations.slice(
-    startIndex,
-    startIndex + stationsPerPage,
-  );
+  const totalPages = Math.ceil(totalStations / apiLimit);
 
   const handleBuyFuel = (item: any) => {
     navigation.navigate("BuyFuel", {
@@ -84,22 +83,61 @@ export default function Stations() {
   };
 
   const formatOperatingHours = (hours?: string) => {
-    if (!hours) return "Available";
+    if (!hours || typeof hours !== "string") {
+      return "Available";
+    }
 
     const [open, close] = hours.split(" - ");
 
-    const formatTime = (time: string) => {
-      const [hour, minute] = time.split(":").map(Number);
+    if (!open || !close) {
+      return "Available";
+    }
+
+    const formatTime = (time?: string) => {
+      if (!time || typeof time !== "string") {
+        return "";
+      }
+
+      const [hourString, minuteString] = time.split(":");
+
+      const hour = Number(hourString);
+      const minute = Number(minuteString);
+
+      if (Number.isNaN(hour) || Number.isNaN(minute)) {
+        return "";
+      }
 
       const period = hour >= 12 ? "PM" : "AM";
       const formattedHour = hour % 12 || 12;
 
-      return `${formattedHour}:${minute.toString().padStart(1, "0")} ${period}`;
+      return `${formattedHour}:${minute.toString().padStart(2, "0")} ${period}`;
     };
 
-    return `${formatTime(open)} - ${formatTime(close)}`;
+    const formattedOpen = formatTime(open);
+    const formattedClose = formatTime(close);
+
+    if (!formattedOpen || !formattedClose) {
+      return "Available";
+    }
+
+    return `${formattedOpen} - ${formattedClose}`;
   };
 
+  console.log("========== STATIONS DEBUG ==========");
+  console.log("activeTab:", activeTab);
+  console.log("fuelType:", FUEL_TYPE_MAP[activeTab]);
+  console.log("currentPage:", currentPage);
+  console.log("stationsResponse:", stationsResponse);
+  console.log("stations:", stations);
+  console.log("totalStations:", totalStations);
+  console.log("totalPages:", totalPages);
+  console.log("isPending:", isPending);
+  console.log("isFetching:", isFetching);
+  console.log("====================================");
+  /**
+   * Whenever search or fuel type changes,
+   * start again from page 1.
+   */
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, activeTab]);
@@ -133,16 +171,12 @@ export default function Stations() {
   };
 
   const renderStation = ({ item }: { item: any }) => {
-    console.log("item", item);
     const isOpen = isCurrentlyOpen(item?.operatingHours);
+
     const selectedProduct = item?.products?.find(
       (product: any) =>
         product?.type?.toLowerCase() === activeTab.toLowerCase(),
     );
-
-    if (isPending) {
-      return <Loading />;
-    }
 
     return (
       <TouchableOpacity
@@ -213,97 +247,105 @@ export default function Stations() {
   };
 
   const listHeader = (
-  <>
-    <SettingsHeader title="List of Fuel Stations" />
+    <>
+      <SettingsHeader title="List of Fuel Stations" />
 
-    <SearchBar
-      placeholder="Search name/location"
-      value={searchQuery}
-      onSearch={setSearchQuery}
-      onPress={() => setOpenFilterModal(true)}
-    />
+      <SearchBar
+        placeholder="Search name/location"
+        value={searchQuery}
+        onSearch={setSearchQuery}
+        onPress={() => setOpenFilterModal(true)}
+      />
 
-    <FlatList
-      data={fuelTabs}
-      keyExtractor={(item) => item}
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.tabsContainer}
-      renderItem={({ item, index }) => {
-        const active = activeTab === item;
+      <FlatList
+        data={fuelTabs}
+        keyExtractor={(item) => item}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.tabsContainer}
+        renderItem={({ item, index }) => {
+          const active = activeTab === item;
 
-        return (
-          <View style={styles.tabItemWrapper}>
-            <TouchableOpacity onPress={() => setActiveTab(item)}>
-              <Text
-                style={[
-                  styles.tabText,
-                  active && styles.activeTabText,
-                ]}
-              >
-                {item}
-              </Text>
-            </TouchableOpacity>
+          return (
+            <View style={styles.tabItemWrapper}>
+              <TouchableOpacity onPress={() => setActiveTab(item)}>
+                <Text style={[styles.tabText, active && styles.activeTabText]}>
+                  {item}
+                </Text>
+              </TouchableOpacity>
 
-            {index !== fuelTabs.length - 1 && (
-              <Text style={styles.dot}>•</Text>
-            )}
-          </View>
-        );
-      }}
-    />
+              {index !== fuelTabs.length - 1 && (
+                <Text style={styles.dot}>•</Text>
+              )}
+            </View>
+          );
+        }}
+      />
 
-    <ReuseableBottomModal
-      visible={openFilterModal}
-      title="Filter"
-      onClose={() => setOpenFilterModal(false)}
-    >
-      <FileterModal setOpenFilterModal={setOpenFilterModal} />
-    </ReuseableBottomModal>
-  </>
-);
+      <ReuseableBottomModal
+        visible={openFilterModal}
+        title="Filter"
+        onClose={() => setOpenFilterModal(false)}
+      >
+        <FileterModal setOpenFilterModal={setOpenFilterModal} />
+      </ReuseableBottomModal>
+    </>
+  );
 
   return (
     <View style={styles.page}>
       <FlatList
-        data={paginatedStations}
+        data={stations}
         keyExtractor={(item) => item.id}
         renderItem={renderStation}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.container}
         ListHeaderComponent={listHeader}
+        refreshing={isFetching && !isPending}
+        onRefresh={() => {
+          // React Query will refetch when the query is invalidated
+          // or when the screen/query becomes stale.
+        }}
         ListEmptyComponent={
-          <View style={styles.empty}>
-            <MaterialIcons name="local-gas-station" size={50} color="#540863" />
+          isPending ? (
+            <Loading />
+          ) : (
+            <View style={styles.empty}>
+              <MaterialIcons
+                name="local-gas-station"
+                size={50}
+                color="#540863"
+              />
 
-            <Text style={styles.emptyTitle}>{activeTab} not available</Text>
+              <Text style={styles.emptyTitle}>{activeTab} not available</Text>
 
-            <Text style={styles.emptyText}>
-              No fuel station currently has {activeTab} available.
-            </Text>
-          </View>
+              <Text style={styles.emptyText}>
+                No fuel station currently has {activeTab} available.
+              </Text>
+            </View>
+          )
         }
         ListFooterComponent={
-          paginatedStations.length > 0 ? (
+          stations.length > 0 && totalPages > 1 ? (
             <View style={styles.pagination}>
               <TouchableOpacity
                 style={[
                   styles.paginationButton,
-                  currentPage === 1 && styles.disabledButton,
+                  apiPage === 1 && styles.disabledButton,
                 ]}
-                disabled={currentPage === 1}
-                onPress={() => setCurrentPage((prev) => prev - 1)}
+                disabled={apiPage === 1 || isFetching}
+                onPress={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
               >
                 <MaterialIcons
                   name="chevron-left"
                   size={24}
-                  color={currentPage === 1 ? "#BDBDBD" : "#7C3AED"}
+                  color={apiPage === 1 ? "#BDBDBD" : "#7C3AED"}
                 />
 
                 <Text
                   style={[
                     styles.paginationText,
-                    currentPage === 1 && styles.disabledText,
+                    apiPage === 1 && styles.disabledText,
                   ]}
                 >
                   Previous
@@ -311,21 +353,23 @@ export default function Stations() {
               </TouchableOpacity>
 
               <Text style={styles.pageNumber}>
-                {currentPage} / {totalPages}
+                {apiPage} / {totalPages}
               </Text>
 
               <TouchableOpacity
                 style={[
                   styles.paginationButton,
-                  currentPage === totalPages && styles.disabledButton,
+                  apiPage === totalPages && styles.disabledButton,
                 ]}
-                disabled={currentPage === totalPages}
-                onPress={() => setCurrentPage((prev) => prev + 1)}
+                disabled={apiPage === totalPages || isFetching}
+                onPress={() =>
+                  setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                }
               >
                 <Text
                   style={[
                     styles.paginationText,
-                    currentPage === totalPages && styles.disabledText,
+                    apiPage === totalPages && styles.disabledText,
                   ]}
                 >
                   Next
@@ -334,7 +378,7 @@ export default function Stations() {
                 <MaterialIcons
                   name="chevron-right"
                   size={24}
-                  color={currentPage === totalPages ? "#BDBDBD" : "#7C3AED"}
+                  color={apiPage === totalPages ? "#BDBDBD" : "#7C3AED"}
                 />
               </TouchableOpacity>
             </View>
