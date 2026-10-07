@@ -46,7 +46,7 @@ export default function BuyFuel() {
   const { selectedStation } = route.params;
   const { data: Users } = useCurrentUser();
   const { data: purchaseHistory } = usePurchases();
-  console.log("purchaseHistory", purchaseHistory);
+
   const { data: userId } = useCurrentUserId();
   const { data: vehicles, isPending } = useVehicles(userId?.id);
   const { mutate: purchasePayment, isPending: isPurchasing } =
@@ -114,8 +114,6 @@ export default function BuyFuel() {
   const totalPrice = quantity * (buying?.pricePerLitre ?? 0);
 
   const handlePayment = () => {
-    console.log("handlePayment called");
-
     if (!buying) {
       showToast("Please select a fuel product.", "warning");
       return;
@@ -161,8 +159,6 @@ export default function BuyFuel() {
       },
 
       onError: (error: any) => {
-        console.log("Purchase failed:", error);
-
         showToast(
           error?.response?.data?.message || "Payment failed. Please try again.",
           "error",
@@ -391,7 +387,7 @@ export default function BuyFuel() {
                 backgroundColor="#540863"
                 onPress={() => {
                   if (
-                    purchaseHistory?.length === 2 &&
+                    purchaseHistory?.length === 3 &&
                     Users?.kycStage !== "COMPLETED"
                   ) {
                     showToast(

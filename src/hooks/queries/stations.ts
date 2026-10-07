@@ -1,11 +1,47 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { getAllStations, nearbyStations } from "../../api/stations";
 
-export const useNearbyStations = (lat?: number, lng?: number) => {
+export const useNearbyStations = ({
+  latitude,
+  longitude,
+  radius = 10,
+  fuelType,
+  search,
+  page = 1,
+  limit = 10,
+}: {
+  latitude?: number;
+  longitude?: number;
+  radius?: number;
+  fuelType?: string;
+  search?: string;
+  page?: number;
+  limit?: number;
+}) => {
   return useQuery({
-    queryKey: ["nearby-stations", lat, lng],
-    queryFn: () => nearbyStations(lat!, lng!),
-    enabled: lat !== undefined && lng !== undefined,
+    queryKey: [
+      "nearby-stations",
+      latitude,
+      longitude,
+      radius,
+      fuelType,
+      search,
+      page,
+      limit,
+    ],
+
+    queryFn: () =>
+      nearbyStations({
+        latitude: latitude!,
+        longitude: longitude!,
+        radius,
+        fuelType,
+        search,
+        page,
+        limit,
+      }),
+
+    enabled: latitude !== undefined && longitude !== undefined,
   });
 };
 

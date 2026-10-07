@@ -30,7 +30,6 @@ export default function VehicleSettings() {
   const { data: vehicles, isPending } = useVehicles(userId?.id);
   const { data: Users } = useCurrentUser();
 
-  console.log("vehicles", vehicles);
   const [selected, setSelected] = useState("");
   const [openMenuIndex, setOpenMenuIndex] = useState<number | null>(null);
   const [deleteVehicleModal, setDeleteVehicleModal] = useState(false);

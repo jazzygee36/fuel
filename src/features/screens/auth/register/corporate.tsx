@@ -72,7 +72,7 @@ export default function Corporate() {
       },
 
       onError: (error: any) => {
-        console.log("Registration error:", error?.response?.data);
+       
 
         showToast(
           error?.response?.data?.message ||

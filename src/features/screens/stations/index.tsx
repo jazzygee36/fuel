@@ -15,8 +15,9 @@ import FileterModal from "../dashboard/filter-moda";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../../navigation/types";
 import { useNavigation } from "@react-navigation/native";
-import { useAllStations } from "../../../hooks/queries/stations";
+import { useNearbyStations } from "../../../hooks/queries/stations";
 import Loading from "../../../components/loading";
+import { useCurrentLocation } from "../../../hooks/use-current-location";
 
 const fuelTabs = ["Petrol", "Diesel", "Gas", "Kerosene"];
 
@@ -32,38 +33,33 @@ const FUEL_TYPE_MAP: Record<string, string> = {
 export default function Stations() {
   const navigation = useNavigation<NavigationProp>();
 
+  const {
+    location,
+    loading: locationLoading,
+    error: locationError,
+  } = useCurrentLocation();
+
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("Petrol");
   const [openFilterModal, setOpenFilterModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  
 
-  const stationsPerPage = 20;
+  const stationsPerPage = 10;
 
-  /**
-   * The backend handles:
-   * - search
-   * - fuelType
-   * - page
-   * - limit
-   */
   const {
     data: stationsResponse,
     isPending,
     isFetching,
-  } = useAllStations({
+  } = useNearbyStations({
+    latitude: location?.coords.latitude,
+    longitude: location?.coords.longitude,
+    radius: 10,
     search: searchQuery.trim() || undefined,
     fuelType: FUEL_TYPE_MAP[activeTab],
     page: currentPage,
     limit: stationsPerPage,
   });
 
-  console.log("stationsResponse", stationsResponse);
-
-  /**
-   * The API already returns the stations for the requested
-   * page/filter/search, so DON'T filter or slice again here.
-   */
   const stations = Array.isArray(stationsResponse)
     ? stationsResponse
     : (stationsResponse?.stations ?? []);
@@ -75,6 +71,18 @@ export default function Stations() {
   const apiLimit = stationsResponse?.pagination?.limit ?? stationsPerPage;
 
   const totalPages = Math.ceil(totalStations / apiLimit);
+
+  /**
+   * Initial loading state.
+   *
+   * This prevents the screen from rendering an empty FlatList
+   * while the location or first API request is still loading.
+   *
+   * isFetching is intentionally NOT included here because it also
+   * happens during background refetches, pagination, search, etc.
+   */
+  const isInitialLoading =
+    locationLoading || (!location && !locationError) || isPending;
 
   const handleBuyFuel = (item: any) => {
     navigation.navigate("BuyFuel", {
@@ -123,21 +131,13 @@ export default function Stations() {
     return `${formattedOpen} - ${formattedClose}`;
   };
 
-  console.log("========== STATIONS DEBUG ==========");
-  console.log("activeTab:", activeTab);
-  console.log("fuelType:", FUEL_TYPE_MAP[activeTab]);
-  console.log("currentPage:", currentPage);
-  console.log("stationsResponse:", stationsResponse);
-  console.log("stations:", stations);
-  console.log("totalStations:", totalStations);
-  console.log("totalPages:", totalPages);
-  console.log("isPending:", isPending);
-  console.log("isFetching:", isFetching);
-  console.log("====================================");
-  /**
-   * Whenever search or fuel type changes,
-   * start again from page 1.
-   */
+  console.log("LOCATION:", location);
+  console.log("LATITUDE:", location?.coords.latitude);
+  console.log("LONGITUDE:", location?.coords.longitude);
+  console.log("STATIONS RESPONSE:", stationsResponse);
+  console.log("IS PENDING:", isPending);
+  console.log("IS FETCHING:", isFetching);
+
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, activeTab]);
@@ -200,7 +200,9 @@ export default function Stations() {
               <MaterialIcons name="location-pin" size={13} color="#E74C3C" />
 
               <Text style={styles.metaText}>
-                {item?.latitude ? `${item?.latitude} km` : "Nearby"}
+                {item?.latitude
+                  ? `${Number(item.latitude).toFixed(2)} km`
+                  : "Nearby"}
               </Text>
 
               <Text style={styles.metaDot}>•</Text>
@@ -292,6 +294,24 @@ export default function Stations() {
     </>
   );
 
+  /**
+   * IMPORTANT:
+   *
+   * Render the loader before the FlatList while the initial
+   * location/API request is still loading.
+   *
+   * This is what prevents the blank screen.
+   */
+  if (isInitialLoading) {
+    return (
+      <View style={styles.page}>
+        <View style={styles.loadingScreen}>
+          <Loading />
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.page}>
       <FlatList
@@ -307,8 +327,14 @@ export default function Stations() {
           // or when the screen/query becomes stale.
         }}
         ListEmptyComponent={
-          isPending ? (
-            <Loading />
+          locationError ? (
+            <View style={styles.empty}>
+              <MaterialIcons name="location-off" size={50} color="#540863" />
+
+              <Text style={styles.emptyTitle}>Location unavailable</Text>
+
+              <Text style={styles.emptyText}>{locationError}</Text>
+            </View>
           ) : (
             <View style={styles.empty}>
               <MaterialIcons
@@ -398,6 +424,13 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     paddingBottom: 30,
+  },
+
+  loadingScreen: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
   },
 
   center: {

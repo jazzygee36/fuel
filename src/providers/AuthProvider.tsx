@@ -49,8 +49,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // LOGIN
   const login = async (accessToken: string) => {
-    console.log("LOGIN TOKEN:", accessToken);
-
     await token.setAccessToken(accessToken);
 
     const savedToken = await token.getAccessToken();

@@ -18,9 +18,7 @@ export interface LoginDto {
 
 export interface forgotPwdDto {
   email: string;
-  
 }
-
 
 export type SignUpDto = {
   firstName: string;
@@ -28,7 +26,7 @@ export type SignUpDto = {
   email: string;
   phone: string;
   password: string;
-  isCorporate: boolean
+  isCorporate: boolean;
 };
 
 export type CorporateSignUpDto = {
@@ -41,9 +39,12 @@ export type CorporateSignUpDto = {
 export type VerificationProps = {
   documentType: string;
   documentFrontKey: string;
-  documentBackKey:string
-  
+  documentBackKey: string;
 };
+
+export interface SelfieVerificationProps {
+  selfieKey: string;
+}
 
 export interface VehicleDto {
   registrationNumber: string;

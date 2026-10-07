@@ -13,11 +13,11 @@ import { usePurchases } from "../../../hooks/queries/purchases";
 import TransactionsList from "./transaction-items";
 import Loading from "../../../components/loading";
 
-const Filtered = ["Successful", "Unsuccessful", "Cancelled", "Pending"];
+const Filtered = ["Completed", "Cancelled", "Pending"];
 
 export default function TransactionHistory() {
   const { data, isPending, isFetching } = usePurchases();
-  console.log("purchase", data);
+
   const [openFilterModal, setOpenFilterModal] = useState(false);
 
   const [selectionHis, setSelectionHis] = useState<object>({});

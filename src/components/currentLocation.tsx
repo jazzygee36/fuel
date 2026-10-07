@@ -8,7 +8,7 @@ import {
 import * as Location from "expo-location";
 import { nearbyStations } from "../api/stations";
 
-export default function NearbyStations() {
+export default function CurrentLocation() {
   const [location, setLocation] =
     useState<Location.LocationObject | null>(null);
 
@@ -26,14 +26,11 @@ export default function NearbyStations() {
         const servicesEnabled =
           await Location.hasServicesEnabledAsync();
 
-        console.log(
-          "Location services enabled:",
-          servicesEnabled
-        );
+      
 
         if (!servicesEnabled) {
           setErrorMsg(
-            "Please enable location services on your device."
+            "Please enable location services on your device.",
           );
           return;
         }
@@ -42,31 +39,23 @@ export default function NearbyStations() {
         const existingPermission =
           await Location.getForegroundPermissionsAsync();
 
-        console.log(
-          "Existing location permission:",
-          existingPermission.status
-        );
+      
 
-        let permissionStatus =
-          existingPermission.status;
+        let permissionStatus = existingPermission.status;
 
         // Request permission if we don't already have it
         if (permissionStatus !== "granted") {
           const requestedPermission =
             await Location.requestForegroundPermissionsAsync();
 
-          permissionStatus =
-            requestedPermission.status;
+          permissionStatus = requestedPermission.status;
 
-          console.log(
-            "Location permission:",
-            permissionStatus
-          );
+         
         }
 
         if (permissionStatus !== "granted") {
           setErrorMsg(
-            "Permission to access your location was denied."
+            "Permission to access your location was denied.",
           );
           return;
         }
@@ -77,42 +66,38 @@ export default function NearbyStations() {
             accuracy: Location.Accuracy.Balanced,
           });
 
-        console.log(
-          "Current location:",
-          currentLocation
-        );
+      
 
         setLocation(currentLocation);
 
-        const {
-          latitude,
-          longitude,
-        } = currentLocation.coords;
+        const { latitude, longitude } =
+          currentLocation.coords;
 
-        console.log("Latitude:", latitude);
-        console.log("Longitude:", longitude);
+     
 
         // Get nearby stations
-        const response = await nearbyStations(
+        const response = await nearbyStations({
           latitude,
           longitude,
-          10
-        );
+          radius: 10,
+        });
 
-        console.log(
-          "Nearby stations:",
-          response
-        );
+      
 
-        setStations(response);
+        // Handle both possible API response formats
+        const stationList = Array.isArray(response)
+          ? response
+          : response?.stations ?? [];
+
+        setStations(stationList);
       } catch (error) {
         console.error(
           "Failed to get nearby stations:",
-          error
+          error,
         );
 
         setErrorMsg(
-          "Unable to get your location or nearby stations."
+          "Unable to get your location or nearby stations.",
         );
       } finally {
         setLoading(false);
@@ -127,9 +112,7 @@ export default function NearbyStations() {
       <View style={styles.container}>
         <ActivityIndicator size="large" />
 
-        <Text>
-          Finding nearby stations...
-        </Text>
+        <Text>Finding nearby stations...</Text>
       </View>
     );
   }
@@ -153,13 +136,11 @@ export default function NearbyStations() {
           </Text>
 
           <Text>
-            Latitude:{" "}
-            {location.coords.latitude}
+            Latitude: {location.coords.latitude}
           </Text>
 
           <Text>
-            Longitude:{" "}
-            {location.coords.longitude}
+            Longitude: {location.coords.longitude}
           </Text>
         </View>
       )}

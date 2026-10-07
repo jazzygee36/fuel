@@ -59,8 +59,6 @@ export default function Login() {
       },
 
       onError: (error: any) => {
-        console.log("Login error:", error?.response?.data);
-
         showToast(
           error?.response?.data?.message || "Login failed. Please try again.",
           "error",

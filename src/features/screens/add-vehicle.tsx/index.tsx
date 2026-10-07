@@ -84,7 +84,7 @@ export default function AddVehicle() {
       },
 
       onError: (error: any) => {
-        console.log("Add vehicle error:", error);
+
 
         showToast(
           error?.response?.data?.message ||

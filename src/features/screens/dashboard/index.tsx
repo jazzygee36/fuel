@@ -1,4 +1,3 @@
-import * as Location from "expo-location";
 import { useEffect, useState } from "react";
 import {
   ScrollView,
@@ -19,13 +18,16 @@ import { useNavigation } from "@react-navigation/native";
 import { AppTabParamList, RootStackParamList } from "../../../navigation/types";
 import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import { Entypo } from "@expo/vector-icons";
+import * as Location from "expo-location";
 import { useCurrentUser } from "../../../hooks/queries/useCurrentUser";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useCurrentLocation } from "../../../hooks/use-current-location";
 type RootNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type TabNavigationProp = BottomTabNavigationProp<AppTabParamList>;
 
 export default function Dashboard() {
   const { data: Users } = useCurrentUser();
+  console.log("🚀 Current User Data:", Users);
 
   const rootNavigation = useNavigation<RootNavigationProp>();
   const tabNavigation = useNavigation<TabNavigationProp>();
@@ -33,6 +35,108 @@ export default function Dashboard() {
   const [openFilterModal, setOpenFilterModal] = useState(false);
   const [verifyModal, setVerifyModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [locationName, setLocationName] = useState("Locating...");
+
+  const {
+    location,
+    loading: locationLoading,
+    error: locationError,
+  } = useCurrentLocation();
+
+  const getKycProgress = () => {
+    switch (Users?.kycStage) {
+      case "PENDING":
+        return "25%";
+
+      case "SELFIE_CAPTURE":
+        return "50%";
+
+      case "REVIEW":
+        return "75%";
+
+      case "COMPLETED":
+        return "100%";
+
+      default:
+        return "25%";
+    }
+  };
+
+  useEffect(() => {
+    const getLocationName = async () => {
+      if (!location) {
+        setLocationName("Locating...");
+        return;
+      }
+
+      try {
+        const { latitude, longitude } = location.coords;
+
+        const url =
+          `https://nominatim.openstreetmap.org/reverse` +
+          `?format=json` +
+          `&lat=${latitude}` +
+          `&lon=${longitude}` +
+          `&zoom=10` +
+          `&addressdetails=1`;
+
+        const response = await fetch(url, {
+          headers: {
+            Accept: "application/json",
+            "User-Agent": "FuelNetixMobile/1.0",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Reverse geocoding failed: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        console.log("📍 ADDRESS:", data);
+
+        const address = data?.address;
+
+        if (!address) {
+          setLocationName("Current location");
+          return;
+        }
+
+        const locality =
+          address.city ||
+          address.town ||
+          address.village ||
+          address.city_district ||
+          address.municipality ||
+          address.county;
+
+        const state = address.state;
+
+        console.log("📍 LOCALITY:", locality);
+        console.log("📍 STATE:", state);
+
+        if (locality && state) {
+          if (locality.toLowerCase() === state.toLowerCase()) {
+            setLocationName(locality);
+          } else {
+            setLocationName(`${locality}, ${state}`);
+          }
+        } else if (locality) {
+          setLocationName(locality);
+        } else if (state) {
+          setLocationName(state);
+        } else {
+          setLocationName("Current location");
+        }
+      } catch (error) {
+        console.error("❌ Failed to get location name:", error);
+
+        setLocationName("Current location");
+      }
+    };
+
+    getLocationName();
+  }, [location]);
 
   const [ads, setAds] = useState([
     {
@@ -51,88 +155,6 @@ export default function Dashboard() {
       description: "Earn rewards on every transaction",
     },
   ]);
-  const [locationName, setLocationName] = useState("Getting location...");
-
-  useEffect(() => {
-    const getCurrentLocation = async () => {
-      try {
-        setLocationName("Getting location...");
-
-        // 1. Check if location services are enabled
-        const servicesEnabled = await Location.hasServicesEnabledAsync();
-
-        console.log("Location services enabled:", servicesEnabled);
-
-        if (!servicesEnabled) {
-          setLocationName("Turn on location");
-          return;
-        }
-
-        // 2. Request permission
-        const { status } = await Location.requestForegroundPermissionsAsync();
-
-        console.log("Location permission:", status);
-
-        if (status !== "granted") {
-          setLocationName("Location permission denied");
-          return;
-        }
-
-        // 3. Get last known location first
-        const lastKnown = await Location.getLastKnownPositionAsync({
-          maxAge: 60000,
-          requiredAccuracy: 100,
-        });
-
-        console.log("Last known location:", lastKnown);
-
-        // 4. Get current location
-        const location = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.Balanced,
-        });
-
-        console.log("Current location:", location);
-
-        const { latitude, longitude } = location.coords;
-
-        console.log("Latitude:", latitude);
-        console.log("Longitude:", longitude);
-
-        // 5. Reverse geocode
-        const address = await Location.reverseGeocodeAsync({
-          latitude,
-          longitude,
-        });
-
-        console.log("Reverse geocode:", address);
-
-        if (address.length > 0) {
-          const place = address[0];
-
-          console.log("Place:", place);
-
-          const locationParts = [
-            place.name,
-            place.street,
-            place.district,
-            place.city,
-            place.region,
-          ].filter(Boolean);
-
-          const formattedLocation = locationParts.join(", ");
-
-          setLocationName(formattedLocation || "Location unavailable");
-        } else {
-          setLocationName("Location unavailable");
-        }
-      } catch (error) {
-        console.error("LOCATION ERROR:", error);
-        setLocationName("Location unavailable");
-      }
-    };
-
-    getCurrentLocation();
-  }, []);
 
   const closeAd = (id: number) => {
     setAds((prev) => prev.filter((ad) => ad.id !== id));
@@ -249,7 +271,10 @@ export default function Dashboard() {
             <View
               style={[
                 styles.progress,
-                Users?.isVerified && styles.progressComplete,
+                {
+                  width: getKycProgress(),
+                },
+                Users?.kycStage === "COMPLETED" && styles.progressComplete,
               ]}
             />
           </View>
@@ -259,8 +284,9 @@ export default function Dashboard() {
           style={[
             styles.verifyContinue,
             Users?.isVerified && styles.verifiedButton,
+            Users?.kycStage === "REVIEW" && styles.reviewButton,
           ]}
-          disabled={Users?.isVerified}
+          disabled={Users?.isVerified || Users?.kycStage === "REVIEW"}
           onPress={() => {
             if (Users?.kycStage === "SELFIE_CAPTURE") {
               rootNavigation.navigate("SelfieVerification");
@@ -273,13 +299,13 @@ export default function Dashboard() {
             {Users?.kycStage === "SELFIE_CAPTURE"
               ? "Take Selfie"
               : Users?.kycStage === "REVIEW"
-                ? "Reviewing"
+                ? "In Review"
                 : Users?.kycStage === "COMPLETED"
                   ? "Completed"
                   : "Continue"}
           </Text>
 
-          {!Users?.isVerified && (
+          {Users?.kycStage !== "REVIEW" && !Users?.isVerified && (
             <View style={styles.arrowCircle}>
               <Image
                 source={require("../../../assets/png/continue.png")}
@@ -380,6 +406,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "500",
     fontFamily: "BricolageGrotesque",
+    marginTop: 2,
   },
 
   balanceCard: {
@@ -456,7 +483,6 @@ const styles = StyleSheet.create({
   },
 
   progress: {
-    width: "35%",
     height: "100%",
     backgroundColor: "#FF9B2F",
     borderRadius: 10,
@@ -558,5 +584,11 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "700",
     textTransform: "uppercase",
+  },
+
+  reviewButton: {
+    backgroundColor: "#F3F3F3",
+    opacity: 0.7,
+    color: "#262626",
   },
 });
