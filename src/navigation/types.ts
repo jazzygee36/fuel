@@ -31,7 +31,7 @@ export type RootStackParamList = {
   verify: undefined;
   forgot: undefined;
   newpassword: undefined;
-  Stations: undefined;
+  // BuyFuel: undefined;
   app: undefined;
   Support: undefined;
   Verification: undefined;
@@ -40,7 +40,7 @@ export type RootStackParamList = {
   AddVehicle: undefined;
   Settings: undefined;
   Wallet: undefined;
-  Dashboard: undefined;
+  Home: undefined;
   SelfieVerification:undefined;
 
   BuyFuel: {
@@ -49,15 +49,15 @@ export type RootStackParamList = {
 };
 
 export type AppTabParamList = {
-  Dashboard: undefined;
-  Stations: undefined;
+  Home: undefined;
+  BuyFuel: undefined;
   Wallet: undefined;
-  Insure: undefined;
+  Insurance: undefined;
   Settings: undefined;
   // AddVehicle: undefined;
 };
 
 export type StationsNavigationProp = CompositeNavigationProp<
-  BottomTabNavigationProp<AppTabParamList, "Stations">,
+  BottomTabNavigationProp<AppTabParamList, "BuyFuel">,
   NativeStackNavigationProp<RootStackParamList>
 >;

@@ -387,7 +387,7 @@ export default function BuyFuel() {
                 backgroundColor="#540863"
                 onPress={() => {
                   if (
-                    purchaseHistory?.length === 3 &&
+                    purchaseHistory?.length >= 3 &&
                     Users?.kycStage !== "COMPLETED"
                   ) {
                     showToast(

@@ -22,11 +22,17 @@ import {
 } from "../../../hooks/queries/useCurrentUser";
 import { useDeleteVehicle } from "../../../hooks/mutations/vehicles";
 import Loading from "../../../components/loading";
+import { useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import { useQueryClient } from "@tanstack/react-query";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function VehicleSettings() {
+  const queryClient = useQueryClient();
+
   const { data: userId } = useCurrentUserId();
+
   const { data: vehicles, isPending } = useVehicles(userId?.id);
   const { data: Users } = useCurrentUser();
 
@@ -38,6 +44,16 @@ export default function VehicleSettings() {
   const { mutate: deleteVehicle, isPending: isDeleting } = useDeleteVehicle();
 
   const navigation = useNavigation<NavigationProp>();
+
+  useFocusEffect(
+    useCallback(() => {
+      if (userId?.id) {
+        queryClient.invalidateQueries({
+          queryKey: ["vehicles", userId.id],
+        });
+      }
+    }, [queryClient, userId?.id]),
+  );
 
   const handleDelete = (vehicleId: string) => {
     setSelected(vehicleId);

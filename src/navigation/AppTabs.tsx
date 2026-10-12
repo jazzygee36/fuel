@@ -39,13 +39,13 @@ export default function AppTabs() {
         tabBarIcon: ({ focused, color, size }) => {
           let iconName: any;
 
-          if (route.name === "Dashboard") {
+          if (route.name === "Home") {
             iconName = focused ? "home" : "home-outline";
-          } else if (route.name === "Stations") {
+          } else if (route.name === "BuyFuel") {
             iconName = focused ? "location" : "location-outline";
           } else if (route.name === "Wallet") {
             iconName = focused ? "wallet" : "wallet-outline";
-          } else if (route.name === "Insure") {
+          } else if (route.name === "Insurance") {
             iconName = focused ? "shield" : "shield-outline";
           } else if (route.name === "Settings") {
             iconName = focused ? "settings" : "settings-outline";
@@ -55,10 +55,10 @@ export default function AppTabs() {
         },
       })}
     >
-      <Tab.Screen name="Dashboard" component={Dashboard} />
-      <Tab.Screen name="Stations" component={Stations} />
+      <Tab.Screen name="Home" component={Dashboard} />
+      <Tab.Screen name="BuyFuel" component={Stations} />
       <Tab.Screen name="Wallet" component={Wallet} />
-      <Tab.Screen name="Insure" component={Dashboard} />
+      <Tab.Screen name="Insurance" component={Dashboard} />
       <Tab.Screen name="Settings" component={SettingsStack} />
       {/* <Tab.Screen name="AddVehicle" component={AddVehicle} /> */}
     </Tab.Navigator>

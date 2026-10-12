@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ScrollView,
   View,
@@ -22,6 +22,8 @@ import * as Location from "expo-location";
 import { useCurrentUser } from "../../../hooks/queries/useCurrentUser";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useCurrentLocation } from "../../../hooks/use-current-location";
+import { useFocusEffect } from "@react-navigation/native";
+import { useQueryClient } from "@tanstack/react-query";
 type RootNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type TabNavigationProp = BottomTabNavigationProp<AppTabParamList>;
 
@@ -61,6 +63,15 @@ export default function Dashboard() {
         return "25%";
     }
   };
+  const queryClient = useQueryClient();
+
+  useFocusEffect(
+    useCallback(() => {
+      queryClient.invalidateQueries({
+        queryKey: ["me"],
+      });
+    }, [queryClient]),
+  );
 
   useEffect(() => {
     const getLocationName = async () => {
@@ -286,7 +297,11 @@ export default function Dashboard() {
             Users?.isVerified && styles.verifiedButton,
             Users?.kycStage === "REVIEW" && styles.reviewButton,
           ]}
-          disabled={Users?.isVerified || Users?.kycStage === "REVIEW"}
+          disabled={
+            Users?.isVerified ||
+            Users?.kycStage === "REVIEW" ||
+            Users?.kycStage === "COMPLETED"
+          }
           onPress={() => {
             if (Users?.kycStage === "SELFIE_CAPTURE") {
               rootNavigation.navigate("SelfieVerification");
