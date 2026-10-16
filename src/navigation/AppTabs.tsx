@@ -9,6 +9,7 @@ import Stations from "../features/screens/stations";
 import AddVehicle from "../features/screens/add-vehicle.tsx";
 import { AppTabParamList } from "./types";
 
+
 const Tab = createBottomTabNavigator<AppTabParamList>();
 
 export default function AppTabs() {
@@ -41,7 +42,7 @@ export default function AppTabs() {
 
           if (route.name === "Home") {
             iconName = focused ? "home" : "home-outline";
-          } else if (route.name === "BuyFuel") {
+          } else if (route.name === "Station") {
             iconName = focused ? "location" : "location-outline";
           } else if (route.name === "Wallet") {
             iconName = focused ? "wallet" : "wallet-outline";
@@ -56,7 +57,7 @@ export default function AppTabs() {
       })}
     >
       <Tab.Screen name="Home" component={Dashboard} />
-      <Tab.Screen name="BuyFuel" component={Stations} />
+      <Tab.Screen name="Station" component={Stations} />
       <Tab.Screen name="Wallet" component={Wallet} />
       <Tab.Screen name="Insurance" component={Dashboard} />
       <Tab.Screen name="Settings" component={SettingsStack} />

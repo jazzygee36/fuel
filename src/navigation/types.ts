@@ -3,7 +3,6 @@ import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 export type Station = {
-  operatingHours(operatingHours: any): unknown;
   address: string;
   id: number;
   name: string;
@@ -15,7 +14,12 @@ export type Station = {
   petrol?: string;
   Diesel?: string;
   Gas?: string;
-  products?: string;
+  operatingHours?: any;
+  products?: {
+    label: string;
+    pricePerLitre: number;
+    type: string;
+  }[];
   label?: string;
   pricePerLitre?: string;
 };
@@ -31,8 +35,10 @@ export type RootStackParamList = {
   verify: undefined;
   forgot: undefined;
   newpassword: undefined;
-  // BuyFuel: undefined;
   app: undefined;
+  BuyFuel: {
+    selectedStation: Station;
+  };
   Support: undefined;
   Verification: undefined;
   TransactionHistory: undefined;
@@ -41,23 +47,18 @@ export type RootStackParamList = {
   Settings: undefined;
   Wallet: undefined;
   Home: undefined;
-  SelfieVerification:undefined;
-
-  BuyFuel: {
-    selectedStation: Station;
-  };
+  SelfieVerification: undefined;
 };
 
 export type AppTabParamList = {
   Home: undefined;
-  BuyFuel: undefined;
+  Station: undefined;
   Wallet: undefined;
   Insurance: undefined;
   Settings: undefined;
-  // AddVehicle: undefined;
 };
 
 export type StationsNavigationProp = CompositeNavigationProp<
-  BottomTabNavigationProp<AppTabParamList, "BuyFuel">,
+  BottomTabNavigationProp<AppTabParamList, "Station">,
   NativeStackNavigationProp<RootStackParamList>
 >;

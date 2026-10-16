@@ -173,7 +173,7 @@ export default function Settings() {
         <View style={{ gap: 20 }}>
           <AppButton
             title={isLoggingOut ? "Logging out..." : "Logout"}
-            backgroundColor="#540863"
+            backgroundColor="#FF2D55"
             disabled={isLoggingOut}
             onPress={() => {
               logoutUser(undefined, {

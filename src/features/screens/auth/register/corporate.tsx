@@ -13,6 +13,7 @@ import { SignUpDto } from "../../../../utils/types";
 import { useRegistration } from "../../../../hooks/mutations/auth";
 import AppToast from "../../../../components/toast";
 import { useState } from "react";
+import Loading from "../../../../components/loading";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, "login">;
 
@@ -59,7 +60,7 @@ export default function Corporate() {
       email: data.email,
       phone: data.phone,
       password: data.password,
-      isCorporate: true
+      isCorporate: true,
     };
 
     registerUser(payload, {
@@ -72,8 +73,6 @@ export default function Corporate() {
       },
 
       onError: (error: any) => {
-       
-
         showToast(
           error?.response?.data?.message ||
             "Registration failed. Please try again.",
@@ -156,8 +155,9 @@ export default function Corporate() {
                 label="Enter your phone number"
                 placeholder="Phone number"
                 value={value}
-                onChangeText={onChange}
+                onChangeText={(text) => onChange(text.replace(/\D/g, ""))}
                 onBlur={onBlur}
+                keyboardType="number-pad"
                 error={errors.phone?.message}
               />
             )}
@@ -198,11 +198,11 @@ export default function Corporate() {
             <AppButton
               backgroundColor="#540863"
               textColor="#fff"
-              title={isPending ? "Creating account..." : "Sign up for free"}
+              title={isPending ? <Loading /> : "Sign up for free"}
               onPress={handleSubmit(onSubmit)}
             />
             <Text style={{ textAlign: "center", marginTop: 17.5 }}>
-              Already have an account? {''}
+              Already have an account? {""}
               <Text
                 style={styles.signUpText}
                 onPress={() => navigation.navigate("login")}

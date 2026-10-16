@@ -61,8 +61,10 @@ export default function RootNavigator() {
       ) : (
         <>
           <Stack.Screen name="app" component={AppTabs} />
-          <Stack.Screen name="SelfieVerification" component={SelfieVerification} />
-
+          <Stack.Screen
+            name="SelfieVerification"
+            component={SelfieVerification}
+          />
           <Stack.Screen name="Verification" component={Verification} />
           <Stack.Screen
             name="TransactionHistory"

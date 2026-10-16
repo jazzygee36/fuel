@@ -22,6 +22,8 @@ interface VerifyCodePayload {
 interface ResetPasswordPayload {
   token: string;
   password: string;
+  newPassword: string;
+  confirmPassword: string;
 }
 
 export const login = async (payload: LoginDto): Promise<LoginResponse> => {

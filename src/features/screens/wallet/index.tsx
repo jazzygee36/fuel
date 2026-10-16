@@ -4,9 +4,64 @@ import FundWallet from "./fund-wallet";
 import { useState } from "react";
 import TextInputField from "../../../components/textInputField";
 import AppButton from "../../../components/button";
+import { useFundWallet } from "../../../hooks/mutations/wallet";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { FundWalletForm, fundWalletSchema } from "../../../utils/validation";
+import { Alert, Linking } from "react-native";
 
 export default function Wallet() {
-  const [step, setStep] = useState<number>(1);
+  const [step, setStep] = useState<number>(2);
+  const { mutate, isPending } = useFundWallet();
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FundWalletForm>({
+    resolver: zodResolver(fundWalletSchema),
+    defaultValues: {
+      amount: '',
+    },
+  });
+
+  const API_URL = process.env.EXPO_PUBLIC_API_URL;
+
+  const onSubmit = (data: FundWalletForm) => {
+    mutate(
+      {
+        amount: Number(data.amount),
+        paymentMethod: "card",
+        callbackUrl: `${API_URL}wallet/fund/callback`,
+      },
+      {
+        onSuccess: async (response) => {
+          if (!response.paymentUrl) {
+            Alert.alert(
+              "Payment Error",
+              "Unable to get the Paystack payment link.",
+            );
+            return;
+          }
+
+          try {
+            await Linking.openURL(response.paymentUrl);
+          } catch {
+            Alert.alert(
+              "Payment Error",
+              "Could not open the Paystack payment page.",
+            );
+          }
+        },
+        onError: () => {
+          Alert.alert(
+            "Funding Failed",
+            "Unable to initiate wallet funding. Please try again.",
+          );
+        },
+      },
+    );
+  };
 
   return (
     <View style={styles.screen}>
@@ -62,16 +117,28 @@ export default function Wallet() {
               How much would you like to fund?
             </Text>
 
-            <TextInputField placeholder="Enter amount" />
+            <Controller
+              control={control}
+              name="amount"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextInputField
+                  label="Amount"
+                  placeholder="Amount"
+                  value={String(value)}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={errors.amount?.message}
+                />
+              )}
+            />
 
             <View style={styles.footer}>
               <AppButton
                 backgroundColor="#540863"
                 textColor="#fff"
-                title="Continue"
-                onPress={() => {
-                  // continue funding
-                }}
+                title={isPending ? "Processing..." : "Continue"}
+                onPress={handleSubmit(onSubmit)}
+                disabled={isPending}
               />
             </View>
           </View>

@@ -10,6 +10,7 @@ import {
 import { useRef, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useNavigation } from "@react-navigation/native";
 
 import BackArrow from "../../../components/back-arrow";
 import AppButton from "../../../components/button";
@@ -27,6 +28,8 @@ import {
 } from "../../../hooks/mutations/auth";
 import Loading from "../../../components/loading";
 import AppToast from "../../../components/toast";
+import { RootStackParamList } from "../../../navigation/types";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 interface ForgotPasswordProps {
   length?: number;
@@ -37,12 +40,20 @@ export default function ForgotPassword({
   length = 4,
   onComplete,
 }: ForgotPasswordProps) {
+  type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+
+  const navigation = useNavigation<NavigationProp>();
+
   const { mutate, isPending } = useForgotPwd();
+
   const { mutate: verifyCode, isPending: isVerifyingCode } = useVerifyCode();
-  const { mutate: resetPassword } = useResetPassword();
+  // const { mutate: resetPassword } = useResetPassword();
+  const { mutate: resetPassword, isPending: isResettingPassword } =
+    useResetPassword();
 
   const [step, setStep] = useState(1);
   const [otp, setOtp] = useState<string[]>(Array(length).fill(""));
+  const [resetToken, setResetToken] = useState("");
   const [toast, setToast] = useState({
     visible: false,
     message: "",
@@ -55,11 +66,15 @@ export default function ForgotPassword({
     control,
     handleSubmit,
     watch,
+    trigger,
     formState: { errors },
   } = useForm<ForgetPasswordForm>({
     resolver: zodResolver(forgetPasswordSchema),
     defaultValues: {
       email: "",
+      newPassword: "",
+      confirmPassword: "",
+      password: "",
     },
   });
 
@@ -144,14 +159,29 @@ export default function ForgotPassword({
     }
   };
 
-  const handleEmailSubmit = (data: ForgetPasswordForm) => {
-    mutate(data.email, {
+  const handleEmailSubmit = async () => {
+    const isValid = await trigger("email");
+
+    if (!isValid) {
+      return;
+    }
+
+    const currentEmail = email.trim();
+
+    mutate(currentEmail, {
       onSuccess: () => {
         setStep(2);
         showToast("Code has been sent to your email!", "success");
+
         setTimeout(() => {
           inputs.current[0]?.focus();
         }, 100);
+      },
+      onError: (error: any) => {
+        showToast(
+          error?.response?.data?.message || "Email not found.",
+          "error",
+        );
       },
     });
   };
@@ -171,6 +201,7 @@ export default function ForgotPassword({
       {
         onSuccess: (data) => {
           console.log("Code verified:", data);
+          setResetToken(data?.resetToken);
 
           showToast("Code verified successfully!", "success");
 
@@ -211,6 +242,63 @@ export default function ForgotPassword({
 
       onError: (error) => {
         console.error("Request code failed:", error);
+      },
+    });
+  };
+
+  const password = watch("password");
+  const confirmPassword = watch("confirmPassword");
+
+  const isPasswordValid =
+    password.length > 0 &&
+    confirmPassword.length > 0 &&
+    password === confirmPassword &&
+    !errors.password &&
+    !errors.confirmPassword;
+
+  const handleResetPassword = async () => {
+    const isValid = await trigger(["password", "confirmPassword"]);
+
+    if (!isValid) {
+      showToast(
+        "Please enter a valid password and confirm it correctly.",
+        "error",
+      );
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      showToast("Passwords do not match.", "error");
+      return;
+    }
+
+    const payload = {
+      token: resetToken,
+      newPassword: password,
+      confirmPassword,
+      password,
+    };
+
+    console.log("Reset password payload:", payload);
+
+    resetPassword(payload, {
+      onSuccess: () => {
+        showToast("Password reset successfully!", "success");
+
+        setTimeout(() => {
+          navigation.reset({
+            index: 0,
+            routes: [{ name: "login" }],
+          });
+        }, 2000);
+      },
+
+      onError: (error: any) => {
+        showToast(
+          error?.response?.data?.message ||
+            "Unable to reset password. Please try again.",
+          "error",
+        );
       },
     });
   };
@@ -319,7 +407,7 @@ export default function ForgotPassword({
                   onChangeText={onChange}
                   onBlur={onBlur}
                   autoCapitalize="none"
-                  keyboardType="password"
+                  // keyboardType="password"
                   autoCorrect={false}
                   error={errors.password?.message}
                 />
@@ -327,7 +415,7 @@ export default function ForgotPassword({
             />
             <Controller
               control={control}
-              name="confirmPwd"
+              name="confirmPassword"
               render={({ field: { onChange, onBlur, value } }) => (
                 <TextInputField
                   label="Confirm password"
@@ -338,7 +426,7 @@ export default function ForgotPassword({
                   autoCapitalize="none"
                   keyboardType="email-address"
                   autoCorrect={false}
-                  error={errors.confirmPwd?.message}
+                  error={errors.confirmPassword?.message}
                 />
               )}
             />
@@ -350,13 +438,11 @@ export default function ForgotPassword({
       <View style={styles.footer}>
         <AppButton
           backgroundColor={
-            step === 1
-              ? isEmailValid
-                ? "#540863"
-                : "#909194"
-              : isOtpComplete
-                ? "#540863"
-                : "#909194"
+            (step === 1 && email.trim().length > 0) ||
+            (step === 2 && isOtpComplete) ||
+            (step === 3 && isPasswordValid)
+              ? "#540863"
+              : "#909194"
           }
           textColor="#fff"
           title={
@@ -366,19 +452,31 @@ export default function ForgotPassword({
               ) : (
                 "Verify"
               )
-            ) : isVerifyingCode ? (
+            ) : step === 2 ? (
+              isVerifyingCode ? (
+                <Loading />
+              ) : (
+                "Confirm code"
+              )
+            ) : isResettingPassword ? (
               <Loading />
             ) : (
-              "Confirm code"
+              "Reset Password"
             )
           }
           disabled={
             step === 1
-              ? !isEmailValid || isPending
-              : !isOtpComplete || isVerifyingCode
+              ? !email.trim() || isPending
+              : step === 2
+                ? !isOtpComplete || isVerifyingCode
+                : !isPasswordValid || isResettingPassword
           }
           onPress={
-            step === 1 ? handleSubmit(handleEmailSubmit) : handleOtpSubmit
+            step === 1
+              ? handleEmailSubmit
+              : step === 2
+                ? handleOtpSubmit
+                : handleResetPassword
           }
         />
       </View>

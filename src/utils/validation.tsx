@@ -55,6 +55,9 @@ export type CorporateSignUpForm = z.infer<typeof corporateSignUpSchema>;
 
 export const forgetPasswordSchema = z.object({
   email: z.string().min(1, "Email is required").email("Enter a valid email"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  newPassword: z.string().min(6, "Password must be at least 6 characters"),
+  confirmPassword: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 export type ForgetPasswordForm = z.infer<typeof forgetPasswordSchema>;
@@ -86,3 +89,9 @@ export const changePasswordSchema = z
   });
 
 export type ChangePasswordForm = z.infer<typeof changePasswordSchema>;
+
+export const fundWalletSchema = z.object({
+  amount: z.string().min(3, "Enter amount to fund"),
+});
+
+export type FundWalletForm = z.infer<typeof fundWalletSchema>;

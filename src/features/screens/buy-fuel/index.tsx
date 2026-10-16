@@ -10,12 +10,17 @@ import {
 import BackArrow from "../../../components/back-arrow";
 import FundWallet from "../wallet/fund-wallet";
 
-import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
+import {
+  RouteProp,
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from "@react-navigation/native";
 
 import { RootStackParamList } from "../../../navigation/types";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import AppButton from "../../../components/button";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import ReuseableBottomModal from "../../../components/reuseable-bottom-modal";
 import {
   useCurrentUser,
@@ -52,7 +57,7 @@ export default function BuyFuel() {
   const { mutate: purchasePayment, isPending: isPurchasing } =
     usePurchasePayment();
 
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState<number>(1);
   const [buying, setBuying] = useState<Product | null>(null);
 
   const [toast, setToast] = useState({
@@ -178,6 +183,19 @@ export default function BuyFuel() {
       return () => clearTimeout(timer);
     }
   }, [shouldNavigateAfterToast, toast.visible]);
+
+  useFocusEffect(
+    useCallback(() => {
+      setStep(1);
+      setBuying(null);
+      setQuantity(1);
+      setSelectedVehicle(null);
+      setAddVehicle(false);
+      setFuelDetails(false);
+
+      return undefined;
+    }, [selectedStation.id]),
+  );
 
   return (
     <View style={styles.screen}>
@@ -315,7 +333,9 @@ export default function BuyFuel() {
                     key={product.type}
                     style={styles.row}
                     onPress={() => {
-                      (setBuying(product), setStep(2));
+                      setBuying(product);
+                      setQuantity(1);
+                      setStep(2);
                     }}
                   >
                     <View style={styles.leftSection}>

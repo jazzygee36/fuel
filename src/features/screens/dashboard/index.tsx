@@ -224,7 +224,7 @@ export default function Dashboard() {
           </View> */}
         </View>
       </View>
-      <Pressable onPress={() => rootNavigation.navigate("Stations")}>
+      <Pressable onPress={() => tabNavigation.navigate("Station")}>
         <SearchBar
           placeholder="Search name/location"
           value={searchQuery}
@@ -242,7 +242,7 @@ export default function Dashboard() {
       </View>
       <View style={styles.stationsMap}>
         <View style={styles.station}>
-          <Pressable onPress={() => tabNavigation.navigate("Stations")}>
+          <Pressable onPress={() => tabNavigation.navigate("Station")}>
             <Image
               source={require("../../../assets/png/fuelStation.png")}
               // style={styles.stationImage}
@@ -533,7 +533,7 @@ const styles = StyleSheet.create({
     width: 21,
     height: 21,
     borderRadius: 11,
-    backgroundColor: "#665096",
+    // backgroundColor: "#665096",
     justifyContent: "center",
     alignItems: "center",
   },
