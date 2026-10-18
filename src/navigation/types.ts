@@ -1,28 +1,11 @@
-import { CompositeNavigationProp } from "@react-navigation/native";
+import {
+  CompositeNavigationProp,
+  NavigatorScreenParams,
+} from "@react-navigation/native";
 import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
-export type Station = {
-  address: string;
-  id: number;
-  name: string;
-  distance: string;
-  status: string;
-  logo: any;
-  favorite?: boolean;
-  func?: string;
-  petrol?: string;
-  Diesel?: string;
-  Gas?: string;
-  operatingHours?: any;
-  products?: {
-    label: string;
-    pricePerLitre: number;
-    type: string;
-  }[];
-  label?: string;
-  pricePerLitre?: string;
-};
+export type Station = Record<string, any>;
 
 export type RootStackParamList = {
   home: undefined;
@@ -35,7 +18,10 @@ export type RootStackParamList = {
   verify: undefined;
   forgot: undefined;
   newpassword: undefined;
-  app: undefined;
+
+  // Updated for nested tab navigation
+  app: NavigatorScreenParams<AppTabParamList>;
+
   BuyFuel: {
     selectedStation: Station;
   };

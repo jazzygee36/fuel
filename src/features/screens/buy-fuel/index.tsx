@@ -227,7 +227,13 @@ export default function BuyFuel() {
         </View>
 
         {/* WALLET */}
-        <View style={{ marginVertical: 35 }}>
+        <View
+          style={{
+            marginVertical: 35,
+            zIndex: 100,
+            elevation: 10,
+          }}
+        >
           <FundWallet />
         </View>
 

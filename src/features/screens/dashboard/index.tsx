@@ -24,13 +24,15 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useCurrentLocation } from "../../../hooks/use-current-location";
 import { useFocusEffect } from "@react-navigation/native";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAdvert } from "../../../hooks/queries/advert";
 type RootNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type TabNavigationProp = BottomTabNavigationProp<AppTabParamList>;
 
 export default function Dashboard() {
   const { data: Users } = useCurrentUser();
+  const { data: promotions, isPending: promotionPending } = useAdvert();
+  const promotionList = promotions?.banners ?? [];
   console.log("🚀 Current User Data:", Users);
-
   const rootNavigation = useNavigation<RootNavigationProp>();
   const tabNavigation = useNavigation<TabNavigationProp>();
   const [open, setOpen] = useState(false);
@@ -38,6 +40,11 @@ export default function Dashboard() {
   const [verifyModal, setVerifyModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [locationName, setLocationName] = useState("Locating...");
+  const [dismissedAds, setDismissedAds] = useState<(string | number)[]>([]);
+
+  const closeAd = (id: string | number) => {
+    setDismissedAds((prev) => [...prev, id]);
+  };
 
   const {
     location,
@@ -149,27 +156,6 @@ export default function Dashboard() {
     getLocationName();
   }, [location]);
 
-  const [ads, setAds] = useState([
-    {
-      id: 1,
-      title: "Advertisment Banner 1",
-      description: "Protected savings and investment plans",
-    },
-    {
-      id: 2,
-      title: "Advertisment Banner 2",
-      description: "Secure your wallet with smart finance tools",
-    },
-    {
-      id: 3,
-      title: "Advertisment Banner 3",
-      description: "Earn rewards on every transaction",
-    },
-  ]);
-
-  const closeAd = (id: number) => {
-    setAds((prev) => prev.filter((ad) => ad.id !== id));
-  };
   return (
     <ScrollView
       contentContainerStyle={styles.container}
@@ -331,19 +317,34 @@ export default function Dashboard() {
           )}
         </TouchableOpacity>
       </View>
-      {ads.map((ad) => (
-        <View key={ad.id} style={styles.advertCard}>
-          {/* Close button */}
-          <View style={styles.closeIcon}>
-            <Text onPress={() => closeAd(ad.id)}>✕</Text>
-          </View>
+      {!promotionPending &&
+        promotionList
+          .filter((ad: any) => !dismissedAds.includes(ad.id))
+          .map((ad: any) => (
+            <View key={ad.id} style={styles.advertCard}>
+              <View style={styles.closeIcon}>
+                <Pressable
+                  onPress={() => closeAd(ad.id)}
+                  accessibilityRole="button"
+                  hitSlop={10}
+                >
+                  <Text>✕</Text>
+                </Pressable>
+              </View>
 
-          <View>
-            <Text style={styles.advertTitle}>{ad.title}</Text>
-            <Text style={styles.advertDescription}>{ad.description}</Text>
-          </View>
-        </View>
-      ))}
+              {ad.imageUrl ? (
+                <Image
+                  source={{ uri: ad.imageUrl }}
+                  style={styles.bannerImage}
+                  resizeMode="cover"
+                />
+              ) : null}
+
+              <Text style={styles.advertTitle}>{ad.title}</Text>
+
+              <Text style={styles.advertDescription}>{ad.description}</Text>
+            </View>
+          ))}
 
       <ReuseableBottomModal
         visible={open}
@@ -605,5 +606,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#F3F3F3",
     opacity: 0.7,
     color: "#262626",
+  },
+
+  bannerImage: {
+    width: "100%",
+    height: 50,
+    borderRadius: 8,
+    marginBottom: 10,
   },
 });

@@ -12,19 +12,18 @@ interface Props {
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-export default function FundWallet({
-  route,
-  setStep,
-  onAddFunds,
-}: Props) {
+export default function FundWallet({ route, setStep, onAddFunds }: Props) {
   const navigation = useNavigation<NavigationProp>();
   const { data: wallet } = useWallet();
 
   const handleFundWallet = () => {
-    if (setStep ) {
+    if (setStep) {
       setStep(1);
     }
-    navigation.navigate("Wallet");
+
+    navigation.navigate("app", {
+      screen: "Wallet",
+    });
   };
 
   const handleAddFunds = () => {
