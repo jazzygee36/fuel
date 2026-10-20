@@ -18,18 +18,16 @@ export default function App() {
     BricolageGrotesqueBold: require("./src/assets/fonts/BricolageGrotesque-Bold.ttf"),
   });
 
-  const [initialState, setInitialState] = useState<
-    NavigationState | undefined
-  >(undefined);
+  const [initialState, setInitialState] = useState<NavigationState | undefined>(
+    undefined,
+  );
 
   const [isNavigationReady, setIsNavigationReady] = useState(false);
 
   useEffect(() => {
     const restoreNavigationState = async () => {
       try {
-        const savedState = await AsyncStorage.getItem(
-          NAVIGATION_STATE_KEY
-        );
+        const savedState = await AsyncStorage.getItem(NAVIGATION_STATE_KEY);
 
         if (savedState) {
           const parsedState = JSON.parse(savedState);
@@ -39,10 +37,7 @@ export default function App() {
           }
         }
       } catch (error) {
-        console.log(
-          "Failed to restore navigation state:",
-          error
-        );
+        reportError(error);
 
         // Remove corrupted navigation state
         await AsyncStorage.removeItem(NAVIGATION_STATE_KEY);
@@ -55,7 +50,7 @@ export default function App() {
   }, []);
 
   const handleNavigationStateChange = async (
-    state: NavigationState | undefined
+    state: NavigationState | undefined,
   ) => {
     try {
       // Don't save undefined
@@ -64,15 +59,9 @@ export default function App() {
         return;
       }
 
-      await AsyncStorage.setItem(
-        NAVIGATION_STATE_KEY,
-        JSON.stringify(state)
-      );
+      await AsyncStorage.setItem(NAVIGATION_STATE_KEY, JSON.stringify(state));
     } catch (error) {
-      console.log(
-        "Failed to save navigation state:",
-        error
-      );
+      reportError(error);
     }
   };
 

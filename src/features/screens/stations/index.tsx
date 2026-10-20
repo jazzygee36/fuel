@@ -93,15 +93,14 @@ export default function Stations() {
   // Pass the exact station clicked to the BuyFuel screen.
 
   const handleBuyFuel = (station: StationItem) => {
-    console.log("Clicked Station:", station);
-
     navigation.navigate("BuyFuel", {
       selectedStation: {
         ...station,
-        products: station.products?.map((product) => ({
-          ...product,
-          pricePerLitre: Number(product.pricePerLitre),
-        })) ?? [],
+        products:
+          station.products?.map((product) => ({
+            ...product,
+            pricePerLitre: Number(product.pricePerLitre),
+          })) ?? [],
       },
     });
   };

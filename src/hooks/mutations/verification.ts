@@ -8,7 +8,7 @@ export const useKycVerification = () => {
       console.log("Registration successful", data);
     },
     onError: (error) => {
-      console.log("Registration failed", error);
+      reportError( error);
     },
   });
 };
@@ -20,7 +20,7 @@ export const useSelfieVerification = () => {
       console.log("selfieVerification", data);
     },
     onError: (error) => {
-      console.log("selfieVerification failed", error);
+      reportError( error);
     },
   });
 };

@@ -150,8 +150,6 @@ export default function BuyFuel() {
 
     purchasePayment(payload, {
       onSuccess: (data) => {
-        console.log("Purchase successful:", data);
-
         setFuelDetails(false);
 
         showToast(

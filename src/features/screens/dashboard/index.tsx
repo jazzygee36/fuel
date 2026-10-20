@@ -32,7 +32,6 @@ export default function Dashboard() {
   const { data: Users } = useCurrentUser();
   const { data: promotions, isPending: promotionPending } = useAdvert();
   const promotionList = promotions?.banners ?? [];
-  console.log("🚀 Current User Data:", Users);
   const rootNavigation = useNavigation<RootNavigationProp>();
   const tabNavigation = useNavigation<TabNavigationProp>();
   const [open, setOpen] = useState(false);

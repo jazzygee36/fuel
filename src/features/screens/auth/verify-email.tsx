@@ -119,7 +119,6 @@ export default function VerifyEmail({ length = 4, onComplete }: OtpInputProps) {
             if (!isOtpComplete) return;
             setShowModal(true);
             const code = otp.join("");
-            console.log(code);
           }}
         />
         <Text style={{ textAlign: "center", marginTop: 17.5 }}>

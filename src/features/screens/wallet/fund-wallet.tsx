@@ -3,6 +3,7 @@ import { useWallet } from "../../../hooks/queries/wallet";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../../navigation/types";
+import Loading from "../../../components/loading";
 
 interface Props {
   route?: string;
@@ -14,7 +15,7 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function FundWallet({ route, setStep, onAddFunds }: Props) {
   const navigation = useNavigation<NavigationProp>();
-  const { data: wallet } = useWallet();
+  const { data: wallet, isPending } = useWallet();
 
   const handleFundWallet = () => {
     if (setStep) {
@@ -43,7 +44,11 @@ export default function FundWallet({ route, setStep, onAddFunds }: Props) {
         <Text style={styles.balanceLabel}>Total Balance</Text>
 
         <Text style={styles.balanceAmount}>
-          ₦{Number(wallet?.balance ?? 0).toLocaleString()}
+          {isPending ? (
+            <Loading />
+          ) : (
+            `₦${Number(wallet?.balance ?? 0).toLocaleString()}`
+          )}
         </Text>
       </View>
 

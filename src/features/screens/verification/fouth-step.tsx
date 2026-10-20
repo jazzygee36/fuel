@@ -1,11 +1,4 @@
-import {
-  View,
-  StyleSheet,
-  Image,
-  Pressable,
-  Text,
-  Alert,
-} from "react-native";
+import { View, StyleSheet, Image, Pressable, Text, Alert } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import VerifyHeader from "./verify-header";
@@ -53,12 +46,9 @@ export default function ForthStepVerification({
         setBackImage(imageUri);
       }
     } catch (error) {
-      console.log("Image picker error:", error);
+      reportError(error);
 
-      Alert.alert(
-        "Error",
-        "Unable to select the passport image.",
-      );
+      Alert.alert("Error", "Unable to select the passport image.");
     }
   };
 
@@ -71,10 +61,7 @@ export default function ForthStepVerification({
 
       {/* Upload / Selected Image */}
       <Pressable
-        style={[
-          styles.uploadContainer,
-          backImage && styles.selectedContainer,
-        ]}
+        style={[styles.uploadContainer, backImage && styles.selectedContainer]}
         onPress={pickPassport}
       >
         {backImage ? (
@@ -86,30 +73,18 @@ export default function ForthStepVerification({
             />
 
             <View style={styles.changeOverlay}>
-              <Ionicons
-                name="camera-outline"
-                size={20}
-                color="#fff"
-              />
+              <Ionicons name="camera-outline" size={20} color="#fff" />
 
-              <Text style={styles.changeText}>
-                Change photo
-              </Text>
+              <Text style={styles.changeText}>Change photo</Text>
             </View>
           </>
         ) : (
           <>
             <View style={styles.uploadIcon}>
-              <Ionicons
-                name="cloud-upload-outline"
-                size={32}
-                color="#540863"
-              />
+              <Ionicons name="cloud-upload-outline" size={32} color="#540863" />
             </View>
 
-            <Text style={styles.uploadTitle}>
-              Upload passport
-            </Text>
+            <Text style={styles.uploadTitle}>Upload passport</Text>
 
             <Text style={styles.uploadDescription}>
               Tap here to select a photo of the back of your passport
@@ -138,10 +113,7 @@ export default function ForthStepVerification({
           }}
         />
 
-        <Pressable
-          style={styles.backButton}
-          onPress={onBack}
-        >
+        <Pressable style={styles.backButton} onPress={onBack}>
           <Text style={styles.backText}>Back</Text>
         </Pressable>
       </View>

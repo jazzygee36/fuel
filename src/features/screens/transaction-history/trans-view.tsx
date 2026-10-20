@@ -21,7 +21,6 @@ export default function TransactionView({
 }: TransProps) {
   const navigation = useNavigation<NavigationProp>();
   const [scanCode, setScanCode] = useState(false);
-  console.log("selectionHis", selectionHistory);
 
   const barcodeValue = JSON.stringify({
     verificationCode: selectionHistory?.verificationCode,

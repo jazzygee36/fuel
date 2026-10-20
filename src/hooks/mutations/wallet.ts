@@ -10,7 +10,7 @@ export const useFundWallet = () => {
     },
 
     onError: (error) => {
-      console.error("Wallet funding failed:", error);
+     reportError(error);
     },
   });
 };

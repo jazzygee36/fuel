@@ -181,7 +181,7 @@ export default function Settings() {
                   setLogoutModal(false);
                 },
                 onError: (error) => {
-                  console.log("Logout failed:", error);
+                  reportError(error);
                 },
               });
             }}
@@ -270,14 +270,13 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 20,
     fontWeight: "700",
-    textTransform:'uppercase'
+    textTransform: "uppercase",
   },
   userName: {
     color: "#151521",
     fontSize: 16,
     fontWeight: "700",
-    textTransform:'capitalize'
-
+    textTransform: "capitalize",
   },
 
   desc: {

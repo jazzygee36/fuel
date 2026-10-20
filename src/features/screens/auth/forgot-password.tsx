@@ -200,7 +200,6 @@ export default function ForgotPassword({
       },
       {
         onSuccess: (data) => {
-          console.log("Code verified:", data);
           setResetToken(data?.resetToken);
 
           showToast("Code verified successfully!", "success");
@@ -211,8 +210,6 @@ export default function ForgotPassword({
         },
 
         onError: (error: any) => {
-          console.log("Code verification failed:", error);
-
           showToast(
             error?.response?.data?.message ||
               "Invalid or expired verification code.",
@@ -278,8 +275,6 @@ export default function ForgotPassword({
       confirmPassword,
       password,
     };
-
-    console.log("Reset password payload:", payload);
 
     resetPassword(payload, {
       onSuccess: () => {

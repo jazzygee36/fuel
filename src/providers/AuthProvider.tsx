@@ -64,7 +64,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       await logoutApi();
     } catch (error) {
-      console.log("Logout API failed:", error);
+      reportError( error);
     } finally {
       // Always clear local authentication
       await token.clearTokens();

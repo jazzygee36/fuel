@@ -21,12 +21,9 @@ const data = [
 
 export default function AccountSettings() {
   const { data: Users } = useCurrentUser();
-  console.log(Users)
+
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const handleEdit = () => {
-    console.log("Edit profile image clicked");
-    // open image picker or navigate to edit screen
-  };
+  const handleEdit = () => {};
   return (
     <View style={styles.screen}>
       <ScrollView

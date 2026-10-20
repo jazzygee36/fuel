@@ -59,7 +59,7 @@ export const useRegistration = () => {
       console.log("Registration successful", data);
     },
     onError: (error) => {
-      console.log("Registration failed", error);
+      reportError(error);
     },
   });
 };

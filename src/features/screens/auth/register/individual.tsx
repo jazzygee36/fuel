@@ -73,8 +73,6 @@ export default function Individual() {
       },
 
       onError: (error: any) => {
-        console.log("Registration error:", error?.response?.data);
-
         showToast(
           error?.response?.data?.message ||
             "Registration failed. Please try again.",

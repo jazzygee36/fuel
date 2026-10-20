@@ -8,8 +8,9 @@ interface CurrentLocationState {
 }
 
 export const useCurrentLocation = (): CurrentLocationState => {
-  const [location, setLocation] =
-    useState<Location.LocationObject | null>(null);
+  const [location, setLocation] = useState<Location.LocationObject | null>(
+    null,
+  );
 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -17,18 +18,10 @@ export const useCurrentLocation = (): CurrentLocationState => {
   useEffect(() => {
     const getCurrentLocation = async () => {
       try {
-        console.log("📍 Starting location request...");
-
         setLoading(true);
         setError(null);
 
-        const servicesEnabled =
-          await Location.hasServicesEnabledAsync();
-
-        console.log(
-          "📍 Location services enabled:",
-          servicesEnabled
-        );
+        const servicesEnabled = await Location.hasServicesEnabledAsync();
 
         if (!servicesEnabled) {
           setError("Please enable location services on your device.");
@@ -38,71 +31,30 @@ export const useCurrentLocation = (): CurrentLocationState => {
         const { status: existingStatus } =
           await Location.getForegroundPermissionsAsync();
 
-        console.log(
-          "📍 Existing permission:",
-          existingStatus
-        );
-
         let permissionStatus = existingStatus;
 
         if (permissionStatus !== "granted") {
-          console.log("📍 Requesting location permission...");
-
-          const { status } =
-            await Location.requestForegroundPermissionsAsync();
-
-          console.log(
-            "📍 Requested permission:",
-            status
-          );
+          const { status } = await Location.requestForegroundPermissionsAsync();
 
           permissionStatus = status;
         }
 
         if (permissionStatus !== "granted") {
-          console.log("❌ Location permission denied");
-
-          setError(
-            "Permission to access your location was denied."
-          );
+          setError("Permission to access your location was denied.");
 
           return;
         }
 
-        console.log("📍 Getting current GPS position...");
-
-        const currentLocation =
-          await Location.getCurrentPositionAsync({
-            accuracy: Location.Accuracy.High,
-          });
-
-        console.log(
-          "✅ CURRENT LOCATION:",
-          currentLocation
-        );
-
-        console.log(
-          "✅ LATITUDE:",
-          currentLocation.coords.latitude
-        );
-
-        console.log(
-          "✅ LONGITUDE:",
-          currentLocation.coords.longitude
-        );
+        const currentLocation = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.High,
+        });
 
         setLocation(currentLocation);
       } catch (error) {
-        console.error(
-          "❌ Failed to get current location:",
-          error
-        );
+        reportError(error);
 
-        setError(
-          "Unable to get your current location."
-        );
+        setError("Unable to get your current location.");
       } finally {
-        console.log("📍 Location request finished");
         setLoading(false);
       }
     };

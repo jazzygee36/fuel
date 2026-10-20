@@ -85,12 +85,8 @@ export default function FifthStepVerification({
       // 1. Upload FRONT
       const documentFrontKey = await uploadImage(frontImage, "front");
 
-      console.log("Front uploaded:", documentFrontKey);
-
       // 2. Upload BACK
       const documentBackKey = await uploadImage(backImage, "back");
-
-      console.log("Back uploaded:", documentBackKey);
 
       // 3. Prepare KYC payload
       const payload = {
@@ -100,8 +96,6 @@ export default function FifthStepVerification({
         documentFrontKey,
         documentBackKey,
       };
-
-      console.log("KYC payload:", payload);
 
       // 4. Submit KYC
       await verifyKyc(payload);
