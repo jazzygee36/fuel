@@ -17,10 +17,16 @@ const Filtered = ["Completed", "Cancelled", "Pending"];
 
 export default function TransactionHistory() {
   const { data, isPending, isFetching } = usePurchases();
+  console.log('purchase', data)
 
   const [openFilterModal, setOpenFilterModal] = useState(false);
 
   const [selectionHis, setSelectionHis] = useState<object>({});
+  console.log("selectionHis ", selectionHis);
+
+  const validTransactions = (data ?? []).filter(
+  (transaction: any) => transaction.token !== null
+);
 
   const [step, setStep] = useState(1);
 
@@ -28,7 +34,7 @@ export default function TransactionHistory() {
     useState("All transactions");
 
   if (isPending || isFetching) {
-    <Loading />;
+    return <Loading />;
   }
 
   return (
@@ -70,7 +76,7 @@ export default function TransactionHistory() {
               setStep={setStep}
               setSelectionHis={setSelectionHis}
               transactionFilter={transactionFilter}
-              data={data ?? []}
+             data={validTransactions}
             />
           </>
         )}

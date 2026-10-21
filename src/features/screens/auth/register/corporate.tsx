@@ -199,6 +199,7 @@ export default function Corporate() {
               backgroundColor="#540863"
               textColor="#fff"
               title={isPending ? <Loading /> : "Sign up for free"}
+              disabled={isPending}
               onPress={handleSubmit(onSubmit)}
             />
             <Text style={{ textAlign: "center", marginTop: 17.5 }}>

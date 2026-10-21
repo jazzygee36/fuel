@@ -17,11 +17,7 @@ import ReuseableBottomModal from "../../../components/reuseable-bottom-modal";
 import FileterModal from "../dashboard/filter-moda";
 import Loading from "../../../components/loading";
 
-import {
-  RootStackParamList,
-  Station,
-  StationsNavigationProp,
-} from "../../../navigation/types";
+import { Station, StationsNavigationProp } from "../../../navigation/types";
 import { useNearbyStations } from "../../../hooks/queries/stations";
 import { useCurrentLocation } from "../../../hooks/use-current-location";
 
@@ -456,7 +452,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#fff",
   },
   center: {
     flex: 1,

@@ -214,9 +214,9 @@ export default function Dashboard() {
           placeholder="Search name/location"
           value={searchQuery}
           onSearch={setSearchQuery}
-          onPress={() => {
-            setOpenFilterModal(true);
-          }}
+          // onPress={() => {
+          //   setOpenFilterModal(true);
+          // }}
         />
       </Pressable>
 

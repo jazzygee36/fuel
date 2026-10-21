@@ -16,6 +16,7 @@ import { useState } from "react";
 import AppButton from "../../../components/button";
 import { useCurrentUser } from "../../../hooks/queries/useCurrentUser";
 import { useLogout } from "../../../hooks/mutations/auth";
+import Loading from "../../../components/loading";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -172,7 +173,7 @@ export default function Settings() {
       >
         <View style={{ gap: 20 }}>
           <AppButton
-            title={isLoggingOut ? "Logging out..." : "Logout"}
+            title={isLoggingOut ? <Loading /> : "Logout"}
             backgroundColor="#FF2D55"
             disabled={isLoggingOut}
             onPress={() => {

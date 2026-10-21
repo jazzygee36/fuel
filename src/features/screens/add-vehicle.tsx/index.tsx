@@ -21,11 +21,25 @@ import { RootStackParamList } from "../../../navigation/types";
 import { useNavigation } from "@react-navigation/native";
 import { useState } from "react";
 import AppToast from "../../../components/toast";
+import {
+  useVehicleMakes,
+  useVehicleModels,
+} from "../../../hooks/queries/vehicles";
+
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function AddVehicle() {
   const { data: userId } = useCurrentUserId();
   const { mutate, isPending } = useAddVehicles(userId?.id);
+  const [selectedMake, setSelectedMake] = useState("");
+
+  const { data: vehicleMakes = [], isPending: vehicleMakesIsPending } =
+    useVehicleMakes();
+
+  const { data: vehicleModels = [], isPending: vehicleModelsIsPending } =
+    useVehicleModels(selectedMake);
+
+  console.log("vehicleMakes", vehicleModels);
   const navigation = useNavigation<NavigationProp>();
 
   const [toast, setToast] = useState({
@@ -46,6 +60,8 @@ export default function AddVehicle() {
   const {
     control,
     handleSubmit,
+    setValue,
+    reset,
     formState: { errors },
   } = useForm<VehicleForm>({
     resolver: zodResolver(vehicleSchema),
@@ -76,16 +92,22 @@ export default function AddVehicle() {
     mutate(payload, {
       onSuccess: () => {
         showToast("Vehicle added successfully!", "success");
-
-        // Give the toast a moment to display before navigating
+        reset({
+          registrationNumber: "",
+          make: "",
+          model: "",
+          year: "",
+          color: "",
+          vin: "",
+          fuelType: "",
+          capacity: "",
+        });
         setTimeout(() => {
           navigation.navigate("VehicleSettings");
         }, 1500);
       },
 
       onError: (error: any) => {
-
-
         showToast(
           error?.response?.data?.message ||
             "Failed to add vehicle. Please try again.",
@@ -136,28 +158,42 @@ export default function AddVehicle() {
           <Controller
             control={control}
             name="make"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <TextInputField
+            render={({ field: { onChange, value } }) => (
+              <SelectInput
                 label="Vehicle name"
-                placeholder="Vehicle name"
+                placeholder={
+                  vehicleMakesIsPending
+                    ? "Loading vehicle names..."
+                    : "Select vehicle"
+                }
                 value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                error={errors?.make?.message}
+                options={vehicleMakes}
+                onChange={(make: string) => {
+                  onChange(make);
+                  setSelectedMake(make);
+                  setValue("model", "");
+                }}
+                error={errors.make?.message}
               />
             )}
           />
           <Controller
             control={control}
             name="model"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <TextInputField
+            render={({ field: { onChange, value } }) => (
+              <SelectInput
                 label="Vehicle Model"
-                placeholder="Vehicle model"
+                placeholder={
+                  !selectedMake
+                    ? "Select vehicle name first"
+                    : vehicleModelsIsPending
+                      ? "Loading models..."
+                      : "Select vehicle model"
+                }
                 value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                error={errors?.model?.message}
+                options={vehicleModels.map((item: any) => item.model)}
+                onChange={onChange}
+                error={errors.model?.message}
               />
             )}
           />
@@ -238,9 +274,13 @@ export default function AddVehicle() {
               <TextInputField
                 label="Capacity"
                 placeholder="Capacity"
-                value={value}
-                onChangeText={onChange}
+                value={String(value ?? "")}
+                onChangeText={(text) => {
+                  const numericValue = text.replace(/[^0-9]/g, "");
+                  onChange(numericValue);
+                }}
                 onBlur={onBlur}
+                keyboardType="numeric"
                 error={errors?.capacity?.message}
               />
             )}
@@ -251,6 +291,7 @@ export default function AddVehicle() {
           variant="filled"
           backgroundColor="#540863"
           onPress={handleSubmit(onSubmit)}
+          disabled={isPending}
         />
       </ScrollView>
     </View>

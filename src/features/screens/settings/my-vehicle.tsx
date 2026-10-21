@@ -70,7 +70,10 @@ export default function VehicleSettings() {
     if (!selected) return;
 
     deleteVehicle(selected, {
-      onSuccess: () => {
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
+          queryKey: ["vehicles"],
+        });
         setDeleteVehicleModal(false);
         setSelected("");
       },
@@ -230,7 +233,7 @@ export default function VehicleSettings() {
           />
 
           <AppButton
-            title={isDeleting ? "Deleting..." : "Continue"}
+            title={isDeleting ? <Loading /> : "Continue"}
             variant="filled"
             backgroundColor="#540863"
             disabled={isDeleting}

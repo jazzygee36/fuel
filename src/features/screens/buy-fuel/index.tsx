@@ -20,7 +20,7 @@ import {
 import { RootStackParamList } from "../../../navigation/types";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import AppButton from "../../../components/button";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import ReuseableBottomModal from "../../../components/reuseable-bottom-modal";
 import {
   useCurrentUser,
@@ -34,6 +34,7 @@ import { FuelProps } from "../../../utils/types";
 import AppToast from "../../../components/toast";
 import { usePurchases } from "../../../hooks/queries/purchases";
 import Loading from "../../../components/loading";
+import { queryClient } from "../../../lib/react-query";
 
 type BuyFuelRouteProp = RouteProp<RootStackParamList, "BuyFuel">;
 
@@ -56,6 +57,8 @@ export default function BuyFuel() {
   const { data: vehicles, isPending } = useVehicles(userId?.id);
   const { mutate: purchasePayment, isPending: isPurchasing } =
     usePurchasePayment();
+
+  const paymentInProgress = useRef(false);
 
   const [step, setStep] = useState<number>(1);
   const [buying, setBuying] = useState<Product | null>(null);
@@ -119,6 +122,11 @@ export default function BuyFuel() {
   const totalPrice = quantity * (buying?.pricePerLitre ?? 0);
 
   const handlePayment = () => {
+    // Prevent duplicate payment requests from rapid taps.
+    if (paymentInProgress.current || isPurchasing) {
+      return;
+    }
+
     if (!buying) {
       showToast("Please select a fuel product.", "warning");
       return;
@@ -148,14 +156,21 @@ export default function BuyFuel() {
       totalPrice,
     };
 
+    // Lock synchronously before sending the request.
+    paymentInProgress.current = true;
+
     purchasePayment(payload, {
-      onSuccess: (data) => {
+      onSuccess:async () => {
+        await queryClient.invalidateQueries({
+          queryKey: ["wallet"],
+        });
         setFuelDetails(false);
 
         showToast(
           "Payment successful! Your fuel purchase has been confirmed.",
           "success",
         );
+
         setTimeout(() => {
           navigation.navigate("TransactionHistory");
         }, 1000);
@@ -166,6 +181,11 @@ export default function BuyFuel() {
           error?.response?.data?.message || "Payment failed. Please try again.",
           "error",
         );
+      },
+
+      onSettled: () => {
+        // Unlock after either success or failure.
+        paymentInProgress.current = false;
       },
     });
   };
@@ -255,8 +275,8 @@ export default function BuyFuel() {
             <View style={styles.stationNameContainer}>
               <Text style={styles.stationName}>
                 {selectedStation?.name
-                  ? selectedStation.name.length > 25
-                    ? `${selectedStation.name.substring(0, 25)}...`
+                  ? selectedStation.name.length > 20
+                    ? `${selectedStation.name.substring(0, 45)}...`
                     : selectedStation.name
                   : "Fuel Station"}
               </Text>
@@ -411,8 +431,9 @@ export default function BuyFuel() {
                 backgroundColor="#540863"
                 onPress={() => {
                   if (
-                    purchaseHistory?.length >= 3 &&
-                    Users?.kycStage !== "COMPLETED"
+                    (purchaseHistory?.length ?? 0) >= 3 &&
+                    Users?.kycStage !== "COMPLETED" &&
+                    Users?.kycStage !== "REVIEW"
                   ) {
                     showToast(
                       "Please complete your KYC verification to continue.",
@@ -420,7 +441,6 @@ export default function BuyFuel() {
                     );
 
                     setShouldNavigateAfterToast(true);
-
                     return;
                   }
 
@@ -517,12 +537,15 @@ export default function BuyFuel() {
           </Text>
         </View>
         <View style={{ width: "100%", marginTop: 10 }}>
-          <AppButton
-            title={isPurchasing ? <Loading /> : "Make payment"}
-            variant="filled"
-            backgroundColor="#540863"
-            onPress={handlePayment}
-          />
+          <View style={{ width: "100%", marginTop: 10 }}>
+            <AppButton
+              title={isPurchasing ? <Loading /> : "Make payment"}
+              variant="filled"
+              backgroundColor="#540863"
+              disabled={isPurchasing}
+              onPress={handlePayment}
+            />
+          </View>
         </View>
       </ReuseableBottomModal>
     </View>

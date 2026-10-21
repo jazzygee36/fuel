@@ -198,7 +198,8 @@ export default function Individual() {
             <AppButton
               backgroundColor="#540863"
               textColor="#fff"
-              title={isPending ? <Loading /> : "Sign up for free"}
+              title={isPending ? <Loading /> : "Sign up "}
+              disabled={isPending}
               onPress={handleSubmit(onSubmit)}
             />
             <Text style={{ textAlign: "center", marginTop: 17.5 }}>
